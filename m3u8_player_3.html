@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemutar M3U8/M3U - Dengan Proxy CORS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b00;
+            --secondary-color: #2c3e50;
+            --dark-bg: #1a1a1a;
+            --light-text: #f8f9fa;
+            --card-bg: #2d2d2d;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--secondary-color), var(--dark-bg));
+            color: var(--light-text);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 50px;
+        }
+        
+        .container-main {
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        
+        .player-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 20px;
+        }
+        
+        #video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        
+        .status-alert {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #ff8933;
+        }
+        
+        .cors-solution {
+            background: rgba(255, 107, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-main">
+        <div class="text-center mb-4">
+            <h1><i class="fas fa-play-circle me-2"></i>Pemutar M3U8/M3U</h1>
+            <p class="text-muted">Dengan solusi mengatasi masalah CORS</p>
+        </div>
+        
+        <div class="player-container">
+            <div class="video-container">
+                <video id="video-player" controls></video>
+            </div>
+            
+            <div class="alert alert-warning status-alert" id="status-alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="status-message"></span>
+            </div>
+            
+            <div class="input-group mb-3">
+                <input type="text" id="stream-url" class="form-control form-control-lg" placeholder="Masukkan URL M3U8/M3U...">
+                <button id="play-btn" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play me-1"></i> Putar
+                </button>
+            </div>
+            
+            <div class="cors-solution">
+                <h5><i class="fas fa-info-circle me-2"></i>Mengatasi Masalah CORS</h5>
+                <p class="mb-1">Jika pemutaran gagal karena CORS, coba:</p>
+                <ol class="mb-1">
+                    <li>Gunakan ekstensi CORS Unblock di browser</li>
+                    <li>Atau gunakan proxy server dengan mengaktifkan opsi di bawah</li>
+                </ol>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="use-proxy">
+                    <label class="form-check-label" for="use-proxy">Gunakan Proxy CORS</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card bg-dark text-light">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Mengapa Stream Saya Tidak Bisa Diputar?</h5>
+            </div>
+            <div class="card-body">
+                <p>Masalah CORS (Cross-Origin Resource Sharing) terjadi ketika server yang menyediakan stream tidak mengizinkan pemutaran dari domain yang berbeda.</p>
+                
+                <h6>Solusi:</h6>
+                <ul>
+                    <li>Gunakan <strong>ekstensi browser CORS Unblock</strong> (paling efektif)</li>
+                    <li>Jika Anda pemilik server, tambahkan header CORS yang sesuai</li>
+                    <li>Gunakan proxy server (opsi di atas) - mungkin tidak bekerja untuk semua stream</li>
+                    <li>Jalankan player ini dari server/localhost yang sama dengan domain stream</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoPlayer = document.getElementById('video-player');
+            const streamUrlInput = document.getElementById('stream-url');
+            const playBtn = document.getElementById('play-btn');
+            const useProxyCheckbox = document.getElementById('use-proxy');
+            const statusAlert = document.getElementById('status-alert');
+            const statusMessage = document.getElementById('status-message');
+            
+            let hls = null;
+            
+            // Fungsi untuk menampilkan status
+            function showStatus(message, isError = true) {
+                statusMessage.textContent = message;
+                statusAlert.style.display = 'block';
+                statusAlert.className = isError ? 
+                    'alert alert-danger status-alert' : 
+                    'alert alert-success status-alert';
+            }
+            
+            // Fungsi untuk menyembunyikan status
+            function hideStatus() {
+                statusAlert.style.display = 'none';
+            }
+            
+            // Fungsi untuk mendapatkan URL dengan proxy jika diaktifkan
+            function getStreamUrl(originalUrl) {
+                if (useProxyCheckbox.checked) {
+                    // Menggunakan proxy CORS publik (catatan: mungkin tidak selalu bekerja)
+                    return `https://corsproxy.io/?${encodeURIComponent(originalUrl)}`;
+                }
+                return originalUrl;
+            }
+            
+            // Fungsi untuk memutar stream
+            function playStream() {
+                const originalUrl = streamUrlInput.value.trim();
+                
+                if (!originalUrl) {
+                    showStatus('Silakan masukkan URL stream M3U8/M3U');
+                    return;
+                }
+                
+                // Hentikan stream sebelumnya jika ada
+                if (hls) {
+                    hls.destroy();
+                }
+                
+                hideStatus();
+                showStatus('Memuat stream...', false);
+                
+                const streamUrl = getStreamUrl(originalUrl);
+                
+                if (Hls.isSupported()) {
+                    hls = new Hls({
+                        debug: false,
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    });
+                    
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(videoPlayer);
+                    
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        hideStatus();
+                        videoPlayer.play();
+                    });
+                    
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.error('Error:', data);
+                        
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    showStatus('Error jaringan. Coba gunakan opsi proxy CORS atau ekstensi CORS Unblock.');
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    showStatus('Error media. Format stream tidak didukung.');
+                                    break;
+                                default:
+                                    showStatus('Error tidak diketahui: ' + data.type);
+                                    break;
+                            }
+                        }
+                    });
+                    
+                } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Untuk browser Safari
+                    videoPlayer.src = streamUrl;
+                    videoPlayer.addEventListener('loadedmetadata', function() {
+                        hideStatus();
+                        videoPlayer.play();
+                    });
+                    
+                    videoPlayer.addEventListener('error', function() {
+                        showStatus('Error pemutaran. Coba gunakan opsi proxy CORS atau ekstensi CORS Unblock.');
+                    });
+                } else {
+                    showStatus('Browser Anda tidak mendukung pemutaran HLS stream.');
+                }
+            }
+            
+            // Event listeners
+            playBtn.addEventListener('click', playStream);
+            
+            streamUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    playStream();
+                }
+            });
+            
+            // Contoh URL untuk testing
+            streamUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+        });
+    </script>
+</body>
+</html>
