@@ -3,202 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M3U8 Player - Repository</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Repository File</title>
     <style>
-        :root {
-            --primary-color: #ff6b00;
-            --secondary-color: #2c3e50;
-            --dark-bg: #1a1a1a;
-            --light-text: #f8f9fa;
-            --card-bg: #2d2d2d;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, var(--secondary-color), var(--dark-bg));
-            color: var(--light-text);
+            background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+            color: #f8f9fa;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-bottom: 50px;
+            padding: 20px;
         }
         
-        .navbar {
-            background-color: rgba(0, 0, 0, 0.7) !important;
-            backdrop-filter: blur(10px);
-        }
-        
-        .container-main {
-            max-width: 1000px;
-            margin-top: 30px;
-        }
-        
-        .project-header {
-            text-align: center;
-            padding: 40px 0;
-            margin-bottom: 30px;
-        }
-        
-        .project-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .project-description {
-            font-size: 1.2rem;
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            color: #ddd;
+            padding: 20px;
         }
         
-        .main-card {
-            background: var(--card-bg);
-            border-radius: 15px;
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+        
+        h1 {
+            color: #ff6b00;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .description {
+            color: #ddd;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .file-list {
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 10px;
             padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .btn-primary {
-            background: var(--primary-color);
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            margin: 10px;
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
         
-        .btn-primary:hover {
+        .file-item:hover {
+            background: rgba(255, 107, 0, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .file-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .file-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #ff6b00;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-link:hover {
             background: #ff8933;
             transform: translateY(-2px);
         }
         
-        .feature-list {
-            margin: 20px 0;
-        }
-        
-        .feature-item {
-            margin-bottom: 15px;
-            padding-left: 30px;
-            position: relative;
-        }
-        
-        .feature-item i {
-            position: absolute;
-            left: 0;
-            top: 2px;
-            color: var(--primary-color);
-        }
-        
-        .footer {
+        footer {
             text-align: center;
-            padding: 30px;
             margin-top: 50px;
             color: #aaa;
             font-size: 0.9rem;
         }
         
-        .instructions {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        
-        @media (max-width: 768px) {
-            .project-title {
+        @media (max-width: 600px) {
+            .file-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            h1 {
                 font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-play-circle me-2"></i>M3U8 Player
-            </a>
-        </div>
-    </nav>
-
-    <div class="container container-main">
-        <div class="project-header">
-            <h1 class="project-title">Pemutar Streaming M3U/M3U8</h1>
-            <p class="project-description">Player streaming berbasis web untuk memutar file M3U dan M3U8 dengan antarmuka yang user-friendly</p>
-        </div>
+    <div class="container">
+        <header>
+            <h1>File Repository</h1>
+            <p class="description">Daftar file yang tersedia di repository GitHub ini</p>
+        </header>
         
-        <div class="main-card">
-            <h2 class="text-center mb-4">Akses Pemutar M3U8</h2>
-            <p class="text-center mb-4">Klik tombol di bawah untuk membuka pemutar M3U8 yang sudah tersedia di repository ini:</p>
-            
-            <div class="text-center">
-                <a href="html%20m3u8%20player%202.html" class="btn btn-primary btn-lg">
-                    <i class="fas fa-tv me-2"></i>Buka Pemutar M3U8
-                </a>
+        <div class="file-list">
+            <div class="file-item">
+                <div class="file-name">filegithub1</div>
+                <a href="m3u8_player_2.html" class="file-link">Buka File</a>
             </div>
             
-            <div class="instructions mt-4">
-                <h4><i class="fas fa-info-circle me-2"></i>Catatan Penting:</h4>
-                <p>Pastikan nama file yang dituju adalah <code>html m3u8 player 2.html</code>. Jika nama file berbeda, harap sesuaikan link di atas.</p>
+            <div class="file-item">
+                <div class="file-name">filegithub2</div>
+                <a href="filegithub2" class="file-link">Buka File</a>
+            </div>
+            
+            <div class="file-item">
+                <div class="file-name">filegithub3</div>
+                <a href="filegithub3" class="file-link">Buka File</a>
             </div>
         </div>
         
-        <div class="main-card">
-            <h3 class="mb-4">Fitur Pemutar M3U8</h3>
-            
-            <div class="feature-list">
-                <div class="feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Support Format M3U/M3U8:</strong> Dapat memutar stream dengan format M3U dan M3U8
-                </div>
-                
-                <div class="feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Kontrol Pemutaran:</strong> Play, pause, volume, dan kontrol pemutaran lengkap
-                </div>
-                
-                <div class="feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Pemilihan Kualitas:</strong> Memilih kualitas stream yang tersedia (jika didukung)
-                </div>
-                
-                <div class="feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Mode Layar Penuh:</strong> Pengalaman menonton dengan mode layar penuh
-                </div>
-                
-                <div class="feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Desain Responsif:</strong> Tampilan yang optimal di desktop dan mobile
-                </div>
-            </div>
-        </div>
-        
-        <div class="main-card">
-            <h3 class="mb-4">Cara Menggunakan</h3>
-            
-            <ol>
-                <li class="mb-2">Klik tombol "Buka Pemutar M3U8" di atas</li>
-                <li class="mb-2">Salin URL stream M3U8/M3U yang ingin diputar</li>
-                <li class="mb-2">Tempel URL pada input box yang tersedia</li>
-                <li class="mb-2">Klik tombol "Putar" untuk memulai streaming</li>
-                <li>Gunakan kontrol yang tersedia untuk mengatur pemutaran</li>
-            </ol>
-            
-            <div class="alert alert-info mt-4" style="background: rgba(0, 123, 255, 0.2); border: none; color: #9fcdff;">
-                <i class="fas fa-lightbulb me-2"></i>
-                <strong>Tip:</strong> Beberapa stream mungkin memerlukan waktu buffering sebelum dapat diputar
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>© 2023 Pemutar M3U/M3U8 | Repository GitHub</p>
-        </div>
+        <footer>
+            <p>© 2023 GitHub Repository</p>
+        </footer>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
