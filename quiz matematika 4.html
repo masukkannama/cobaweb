@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Matematika Seru!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #FF6B6B;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-bottom: 5px solid #FF8E8E;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 0 #FF8E8E;
+            margin-bottom: 10px;
+        }
+        
+        .screen {
+            display: none;
+            padding: 30px;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .category-btn {
+            background-color: #4ECDC4;
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #2a8f88;
+            text-align: center;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 0 #2a8f88;
+        }
+        
+        .level-btn {
+            background-color: #FFD166;
+            border: none;
+            border-radius: 15px;
+            padding: 15px;
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #e9b74e;
+            margin: 10px 0;
+            width: 100%;
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 0 #e9b74e;
+        }
+        
+        .question-container {
+            background-color: #F7F7F7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.8rem;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .option-btn {
+            background-color: #6A67CE;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-btn:hover {
+            background-color: #8A87E9;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            background-color: #FF9E6D;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background-color: #FFB18A;
+        }
+        
+        .tips-btn {
+            background-color: #6A67CE;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .tips-btn:hover {
+            background-color: #8A87E9;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .score-display {
+            font-size: 3rem;
+            color: #FF6B6B;
+            margin: 20px 0;
+        }
+        
+        .progress-container {
+            background-color: #F7F7F7;
+            height: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #4ECDC4;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .feedback {
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #FF6B6B;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            color: #FF6B6B;
+            margin: 10px 0;
+        }
+        
+        .animal {
+            font-size: 4rem;
+            margin: 10px 0;
+        }
+        
+        .level-description {
+            background-color: #FFF4E0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 1rem;
+        }
+        
+        /* Modal Tips */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #FF6B6B;
+        }
+        
+        .tips-content {
+            margin-top: 20px;
+        }
+        
+        .tips-content h3 {
+            color: #4ECDC4;
+            margin-bottom: 10px;
+        }
+        
+        .tips-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .example {
+            background-color: #F7F7F7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .category-grid, .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .question-container {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kuis Matematika Seru!</h1>
+<h2>Ihsan dan Akmal Anak Pintar!</h2>
+            <p>Pilih kategori dan level untuk mulai bermain!</p>
+        </header>
+        
+        <!-- Layar Pemilihan Kategori -->
+        <div id="category-screen" class="screen active">
+            <h2>Pilih Kategori:</h2>
+            <div class="category-grid">
+                <button class="category-btn" data-category="penjumlahan">Penjumlahan ➕</button>
+                <button class="category-btn" data-category="pengurangan">Pengurangan ➖</button>
+                <button class="category-btn" data-category="campuran-penjumlahan-pengurangan">Campuran + dan -</button>
+                <button class="category-btn" data-category="perkalian">Perkalian ✖️</button>
+                <button class="category-btn" data-category="pembagian">Pembagian ➗</button>
+                <button class="category-btn" data-category="campuran-perkalian-pembagian">Campuran × dan ÷</button>
+                <button class="category-btn" data-category="campuran-semua">Campuran Semua</button>
+                <button class="category-btn" data-category="jenius">Jenius 🧠</button>
+            </div>
+            <button class="tips-btn" id="show-tips">Tips Berhitung Matematika</button>
+        </div>
+        
+        <!-- Layar Pemilihan Level -->
+        <div id="level-screen" class="screen">
+            <h2>Pilih Level Kesulitan:</h2>
+            <div class="level-description" id="level-description">
+                Klik pada level untuk melihat penjelasan
+            </div>
+            <button class="level-btn" data-level="1">Level 1 - Mudah 🟢</button>
+            <button class="level-btn" data-level="2">Level 2 - Sedang 🟡</button>
+            <button class="level-btn" data-level="3">Level 3 - Menantang 🟠</button>
+            <button class="level-btn" data-level="4">Level 4 - Sulit 🔴</button>
+            <button class="level-btn" data-level="5">Level 5 - Sangat Sulit 💪</button>
+            <div class="controls">
+                <button class="control-btn" id="back-to-category">Kembali</button>
+                <button class="control-btn" id="start-quiz">Mulai Kuis</button>
+            </div>
+        </div>
+        
+        <!-- Layar Kuis -->
+        <div id="quiz-screen" class="screen">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="timer" id="timer">Waktu: 60 detik</div>
+            <div class="animal" id="animal">🐶</div>
+            <div class="question-container">
+                <div id="question">Berapakah hasil dari 5 + 3?</div>
+            </div>
+            <div class="options-container" id="options">
+                <button class="option-btn">7</button>
+                <button class="option-btn">8</button>
+                <button class="option-btn">9</button>
+                <button class="option-btn">10</button>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="quit-quiz">Keluar</button>
+                <button class="control-btn" id="next-question" disabled>Lanjut</button>
+            </div>
+        </div>
+        
+        <!-- Layar Hasil -->
+        <div id="result-screen" class="screen">
+            <h2>Hasil Kuis</h2>
+            <div class="animal" id="result-animal">🎉</div>
+            <div class="score-display" id="score">0/10</div>
+            <div class="feedback" id="feedback">Bagus sekali!</div>
+            <div class="controls">
+                <button class="control-btn" id="play-again">Main Lagi</button>
+                <button class="control-btn" id="change-category">Ganti Kategori</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tips -->
+    <div class="modal" id="tips-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-tips">&times;</span>
+            <h2>Tips Berhitung Matematika</h2>
+            <div class="tips-content" id="tips-content">
+                <!-- Konten tips akan dimuat di sini -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let currentCategory = '';
+        let currentLevel = 1;
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 60;
+        let timer;
+        let questions = [];
+        
+        // Data tips untuk setiap kategori
+        const tipsData = {
+            penjumlahan: {
+                title: "Tips Penjumlahan",
+                content: `
+                    <h3>Cara Mudah Menjumlahkan Bilangan</h3>
+                    <p>Penjumlahan adalah menggabungkan dua bilangan atau lebih menjadi satu bilangan yang disebut jumlah.</p>
+                    
+                    <h3>Tips Berhitung:</h3>
+                    <p>1. Mulailah dari angka terbesar untuk memudahkan perhitungan</p>
+                    <p>2. Gunakan jari jika diperlukan untuk menghitung</p>
+                    <p>3. Pecah bilangan besar menjadi bilangan yang lebih kecil</p>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal:</h3>
+                        <p>7 + 5 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Ambil angka terbesar (7)</p>
+                        <p>2. Tambahkan 5 dengan cara: 7 + 3 = 10, lalu 10 + 2 = 12</p>
+                        <p>3. Jadi, 7 + 5 = 12</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal Level Tinggi:</h3>
+                        <p>345 + 278 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Jumlahkan satuan: 5 + 8 = 13 (tulis 3, simpan 1)</p>
+                        <p>2. Jumlahkan puluhan: 4 + 7 + 1 (simpanan) = 12 (tulis 2, simpan 1)</p>
+                        <p>3. Jumlahkan ratusan: 3 + 2 + 1 (simpanan) = 6</p>
+                        <p>4. Jadi, 345 + 278 = 623</p>
+                    </div>
+                `
+            },
+            pengurangan: {
+                title: "Tips Pengurangan",
+                content: `
+                    <h3>Cara Mudah Mengurangi Bilangan</h3>
+                    <p>Pengurangan adalah mengambil sebagian bilangan dari bilangan lain.</p>
+                    
+                    <h3>Tips Berhitung:</h3>
+                    <p>1. Selalu kurangi bilangan yang lebih kecil dari bilangan yang lebih besar</p>
+                    <p>2. Gunakan garis bilangan untuk membantu visualisasi</p>
+                    <p>3. Untuk pengurangan dengan hasil negatif, bayangkan hutang</p>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal:</h3>
+                        <p>15 - 7 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Kurangi 5 dari 15: 15 - 5 = 10</p>
+                        <p>2. Kurangi sisanya: 10 - 2 = 8</p>
+                        <p>3. Jadi, 15 - 7 = 8</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal dengan Hasil Negatif:</h3>
+                        <p>8 - 12 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Kurangi seperti biasa: 12 - 8 = 4</p>
+                        <p>2. Karena bilangan yang dikurangi lebih kecil, hasilnya negatif</p>
+                        <p>3. Jadi, 8 - 12 = -4</p>
+                    </div>
+                `
+            },
+            perkalian: {
+                title: "Tips Perkalian",
+                content: `
+                    <h3>Cara Mudah Mengalikan Bilangan</h3>
+                    <p>Perkalian adalah penjumlahan berulang dari bilangan yang sama.</p>
+                    
+                    <h3>Tips Berhitung:</h3>
+                    <p>1. Hafalkan tabel perkalian dasar (1-10)</p>
+                    <p>2. Gunakan sifat komutatif: a × b = b × a</p>
+                    <p>3. Untuk perkalian dengan angka 0, hasilnya selalu 0</p>
+                    <p>4. Untuk perkalian dengan angka negatif:</p>
+                    <p>   - Positif × Negatif = Negatif</p>
+                    <p>   - Negatif × Negatif = Positif</p>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal:</h3>
+                        <p>7 × 8 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Ingat tabel perkalian: 7 × 8 = 56</p>
+                        <p>2. Atau: 7 × 5 = 35, 7 × 3 = 21, lalu 35 + 21 = 56</p>
+                        <p>3. Jadi, 7 × 8 = 56</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal dengan Bilangan Negatif:</h3>
+                        <p>-7 × 3 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Kalikan seperti biasa: 7 × 3 = 21</p>
+                        <p>2. Karena positif × negatif = negatif</p>
+                        <p>3. Jadi, -7 × 3 = -21</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal Perkalian Negatif:</h3>
+                        <p>-7 × -3 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Kalikan seperti biasa: 7 × 3 = 21</p>
+                        <p>2. Karena negatif × negatif = positif</p>
+                        <p>3. Jadi, -7 × -3 = 21</p>
+                    </div>
+                `
+            },
+            pembagian: {
+                title: "Tips Pembagian",
+                content: `
+                    <h3>Cara Mudah Membagi Bilangan</h3>
+                    <p>Pembagian adalah kebalikan dari perkalian, yaitu mencari berapa kali suatu bilangan terkandung dalam bilangan lain.</p>
+                    
+                    <h3>Tips Berhitung:</h3>
+                    <p>1. Pembagian dengan 0 tidak terdefinisi</p>
+                    <p>2. 0 dibagi bilangan apa pun (kecuali 0) hasilnya 0</p>
+                    <p>3. Untuk pembagian dengan angka negatif:</p>
+                    <p>   - Positif ÷ Negatif = Negatif</p>
+                    <p>   - Negatif ÷ Negatif = Positif</p>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal:</h3>
+                        <p>56 ÷ 7 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Ingat perkalian: 7 × 8 = 56</p>
+                        <p>2. Jadi, 56 ÷ 7 = 8</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal dengan Bilangan Negatif:</h3>
+                        <p>-21 ÷ 3 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Bagi seperti biasa: 21 ÷ 3 = 7</p>
+                        <p>2. Karena positif ÷ negatif = negatif</p>
+                        <p>3. Jadi, -21 ÷ 3 = -7</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal Pembagian dengan 0:</h3>
+                        <p>14 ÷ 0 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Pembagian dengan 0 tidak terdefinisi</p>
+                        <p>2. Tidak ada bilangan yang jika dikali 0 hasilnya 14</p>
+                        <p>3. Jadi, 14 ÷ 0 = tidak terdefinisi</p>
+                    </div>
+                `
+            },
+            default: {
+                title: "Tips Matematika Umum",
+                content: `
+                    <h3>Tips Belajar Matematika</h3>
+                    <p>Matematika adalah pelajaran yang menyenangkan jika kita tahu caranya!</p>
+                    
+                    <h3>Tips Berhitung:</h3>
+                    <p>1. Berlatihlah setiap hari, bahkan jika hanya 15 menit</p>
+                    <p>2. Gunakan benda nyata untuk membantu memahami konsep</p>
+                    <p>3. Jangan takut membuat kesalahan - itu bagian dari belajar</p>
+                    <p>4. Pecah masalah besar menjadi bagian-bagian kecil</p>
+                    
+                    <div class="example">
+                        <h3>Contoh Soal Campuran:</h3>
+                        <p>2 × 3 + 5 - 1 = ?</p>
+                        <p>Langkah penyelesaian:</p>
+                        <p>1. Kerjakan perkalian dulu: 2 × 3 = 6</p>
+                        <p>2. Sekarang soal menjadi: 6 + 5 - 1</p>
+                        <p>3. Kerjakan dari kiri: 6 + 5 = 11</p>
+                        <p>4. Lalu: 11 - 1 = 10</p>
+                        <p>5. Jadi, 2 × 3 + 5 - 1 = 10</p>
+                    </div>
+	 `
+            }
+        };
+        
+        // Deskripsi level untuk setiap kategori
+        const levelDescriptions = {
+            penjumlahan: {
+                1: "Penjumlahan dengan angka 1 digit (contoh: 3 + 5)",
+                2: "Penjumlahan dengan angka 1 dan 2 digit (contoh: 7 + 12)",
+                3: "Penjumlahan dengan angka 2 digit (contoh: 23 + 45)",
+                4: "Penjumlahan dengan angka 2 dan 3 digit (contoh: 56 + 123)",
+                5: "Penjumlahan dengan angka 3 digit (contoh: 456 + 789)"
+            },
+            pengurangan: {
+                1: "Pengurangan dengan angka 1 digit (contoh: 8 - 3)",
+                2: "Pengurangan dengan angka 1 dan 2 digit, mungkin hasil negatif (contoh: 5 - 12 = -7)",
+                3: "Pengurangan dengan angka 2 digit (contoh: 45 - 23)",
+                4: "Pengurangan dengan angka 2 dan 3 digit, mungkin hasil negatif (contoh: 56 - 123 = -67)",
+                5: "Pengurangan dengan angka 3 digit, mungkin hasil negatif (contoh: 456 - 789 = -333)"
+            },
+            "campuran-penjumlahan-pengurangan": {
+                1: "Campuran penjumlahan dan pengurangan dengan angka 1 digit",
+                2: "Campuran penjumlahan dan pengurangan dengan angka 1 dan 2 digit, mungkin hasil negatif",
+                3: "Campuran penjumlahan dan pengurangan dengan angka 2 digit",
+                4: "Campuran penjumlahan dan pengurangan dengan angka 2 dan 3 digit, mungkin hasil negatif",
+                5: "Campuran penjumlahan dan pengurangan dengan angka 3 digit, mungkin hasil negatif"
+            },
+            perkalian: {
+                1: "Perkalian dengan angka 1 digit (contoh: 3 × 5)",
+                2: "Perkalian dengan angka 1 dan 2 digit (contoh: 7 × 12)",
+                3: "Perkalian dengan angka 0 (contoh: 14 × 0 = 0)",
+                4: "Perkalian dengan hasil negatif (contoh: -7 × 3 = -21)",
+                5: "Perkalian dengan angka negatif (contoh: -7 × -3 = 21)"
+            },
+            pembagian: {
+                1: "Pembagian dengan angka 1 digit, hasil positif (contoh: 8 ÷ 2)",
+                2: "Pembagian dengan angka 1 dan 2 digit, hasil positif (contoh: 36 ÷ 4)",
+                3: "Pembagian dengan angka 0 (contoh: 14 ÷ 0 = tidak terdefinisi)",
+                4: "Pembagian dengan hasil negatif (contoh: -21 ÷ 3 = -7)",
+                5: "Pembagian dengan angka negatif (contoh: -21 ÷ -3 = 7)"
+            },
+            "campuran-perkalian-pembagian": {
+                1: "Campuran perkalian dan pembagian dengan angka 1 digit",
+                2: "Campuran perkalian dan pembagian dengan angka 1 dan 2 digit",
+                3: "Campuran perkalian dan pembagian dengan angka 0",
+                4: "Campuran perkalian dan pembagian dengan hasil negatif",
+                5: "Campuran perkalian dan pembagian dengan angka negatif"
+            },
+            "campuran-semua": {
+                1: "Campuran semua operasi dengan angka 1 digit",
+                2: "Campuran semua operasi dengan angka 1 dan 2 digit",
+                3: "Campuran semua operasi dengan angka 0",
+                4: "Campuran semua operasi dengan hasil negatif",
+                5: "Campuran semua operasi dengan angka negatif"
+            },
+            jenius: {
+                1: "Dua operasi dengan angka 1 digit (contoh: 2×3+1=7)",
+                2: "Dua operasi dengan angka 1 dan 2 digit",
+                3: "Dua operasi dengan angka 0 dan negatif",
+                4: "Dua operasi dengan hasil negatif",
+                5: "Dua operasi kompleks dengan angka negatif"
+            }
+        };
+        
+        // Elemen DOM
+        const categoryScreen = document.getElementById('category-screen');
+        const levelScreen = document.getElementById('level-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const timeElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const feedbackElement = document.getElementById('feedback');
+        const progressBar = document.getElementById('progress-bar');
+        const animalElement = document.getElementById('animal');
+        const resultAnimalElement = document.getElementById('result-animal');
+        const levelDescriptionElement = document.getElementById('level-description');
+        const tipsModal = document.getElementById('tips-modal');
+        const tipsContent = document.getElementById('tips-content');
+        const showTipsBtn = document.getElementById('show-tips');
+        const closeTipsBtn = document.getElementById('close-tips');
+        
+        // Event listeners untuk kategori
+        document.querySelectorAll('.category-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                currentCategory = button.dataset.category;
+                categoryScreen.classList.remove('active');
+                levelScreen.classList.add('active');
+                
+                // Update deskripsi level default
+                levelDescriptionElement.textContent = levelDescriptions[currentCategory][1];
+            });
+        });
+        
+        // Event listeners untuk level
+        document.querySelectorAll('.level-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Hapus seleksi sebelumnya
+                document.querySelectorAll('.level-btn').forEach(btn => {
+                    btn.style.backgroundColor = '#FFD166';
+                });
+                
+                // Tandai level yang dipilih
+                button.style.backgroundColor = '#4ECDC4';
+                
+                currentLevel = parseInt(button.dataset.level);
+                
+                // Update deskripsi level
+                levelDescriptionElement.textContent = levelDescriptions[currentCategory][currentLevel];
+            });
+        });
+        
+        // Event listener untuk mulai kuis
+        document.getElementById('start-quiz').addEventListener('click', () => {
+            generateQuestions();
+            levelScreen.classList.remove('active');
+            quizScreen.classList.add('active');
+            startTimer();
+            showQuestion();
+        });
+        
+        // Event listeners untuk navigasi
+        document.getElementById('back-to-category').addEventListener('click', () => {
+            levelScreen.classList.remove('active');
+            categoryScreen.classList.add('active');
+        });
+        
+        document.getElementById('quit-quiz').addEventListener('click', () => {
+            clearInterval(timer);
+            quizScreen.classList.remove('active');
+            categoryScreen.classList.add('active');
+        });
+        
+        document.getElementById('next-question').addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        document.getElementById('play-again').addEventListener('click', () => {
+            resultScreen.classList.remove('active');
+            levelScreen.classList.add('active');
+        });
+        
+        document.getElementById('change-category').addEventListener('click', () => {
+            resultScreen.classList.remove('active');
+            categoryScreen.classList.add('active');
+        });
+        
+        // Event listeners untuk tips modal
+        showTipsBtn.addEventListener('click', () => {
+            showTips();
+        });
+        
+        closeTipsBtn.addEventListener('click', () => {
+            tipsModal.style.display = 'none';
+        });
+        
+        // Tutup modal jika klik di luar konten
+        window.addEventListener('click', (event) => {
+            if (event.target === tipsModal) {
+                tipsModal.style.display = 'none';
+            }
+        });
+        
+        // Tampilkan tips
+        function showTips() {
+            const tips = tipsData[currentCategory] || tipsData.default;
+            tipsContent.innerHTML = tips.content;
+            tipsModal.style.display = 'flex';
+        }
+        
+        // Generate soal berdasarkan kategori dan level
+        function generateQuestions() {
+            questions = [];
+            
+            for (let i = 0; i < 10; i++) {
+                let question = {};
+                
+                switch(currentCategory) {
+                    case 'penjumlahan':
+                        question = generatePenjumlahan();
+                        break;
+                    case 'pengurangan':
+                        question = generatePengurangan();
+                        break;
+                    case 'campuran-penjumlahan-pengurangan':
+                        question = generateCampuranPenjumlahanPengurangan();
+                        break;
+                    case 'perkalian':
+                        question = generatePerkalian();
+                        break;
+                    case 'pembagian':
+                        question = generatePembagian();
+                        break;
+                    case 'campuran-perkalian-pembagian':
+                        question = generateCampuranPerkalianPembagian();
+                        break;
+                    case 'campuran-semua':
+                        question = generateCampuranSemua();
+                        break;
+                    case 'jenius':
+                        question = generateJenius();
+                        break;
+                }
+                
+                questions.push(question);
+            }
+        }
+        
+        // Fungsi pembuat soal penjumlahan
+        function generatePenjumlahan() {
+            let num1, num2, answer;
+            
+            switch(currentLevel) {
+                case 1:
+                    num1 = Math.floor(Math.random() * 9) + 1;
+                    num2 = Math.floor(Math.random() * 9) + 1;
+                    break;
+                case 2:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 9) + 1;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                    } else {
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 9) + 1;
+                    }
+                    break;
+                case 3:
+                    num1 = Math.floor(Math.random() * 90) + 10;
+                    num2 = Math.floor(Math.random() * 90) + 10;
+                    break;
+                case 4:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 900) + 100;
+                    } else {
+                        num1 = Math.floor(Math.random() * 900) + 100;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                    }
+                    break;
+                case 5:
+                    num1 = Math.floor(Math.random() * 900) + 100;
+                    num2 = Math.floor(Math.random() * 900) + 100;
+                    break;
+            }
+            
+            answer = num1 + num2;
+            
+            return {
+                question: `Berapakah hasil dari ${num1} + ${num2}?`,
+                answer: answer,
+                options: generateOptions(answer, 20)
+            };
+        }
+        
+        // Fungsi pembuat soal pengurangan
+        function generatePengurangan() {
+            let num1, num2, answer;
+            
+            switch(currentLevel) {
+                case 1:
+                    num1 = Math.floor(Math.random() * 9) + 1;
+                    num2 = Math.floor(Math.random() * num1) + 1;
+                    break;
+                case 2:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 9) + 1;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                    } else {
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 9) + 1;
+                    }
+                    break;
+                case 3:
+                    num1 = Math.floor(Math.random() * 90) + 10;
+                    num2 = Math.floor(Math.random() * num1) + 1;
+                    break;
+                case 4:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 900) + 100;
+                    } else {
+                        num1 = Math.floor(Math.random() * 900) + 100;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                    }
+                    break;
+                case 5:
+                    num1 = Math.floor(Math.random() * 900) + 100;
+                    num2 = Math.floor(Math.random() * 900) + 100;
+                    break;
+            }
+            
+            answer = num1 - num2;
+            
+            return {
+                question: `Berapakah hasil dari ${num1} - ${num2}?`,
+                answer: answer,
+                options: generateOptions(answer, 20, true)
+            };
+        }
+        
+        // Fungsi pembuat soal campuran penjumlahan dan pengurangan
+        function generateCampuranPenjumlahanPengurangan() {
+            if (Math.random() > 0.5) {
+                return generatePenjumlahan();
+            } else {
+                return generatePengurangan();
+            }
+        }
+        
+        // Fungsi pembuat soal perkalian
+        function generatePerkalian() {
+            let num1, num2, answer;
+            
+            switch(currentLevel) {
+                case 1:
+                    num1 = Math.floor(Math.random() * 9) + 1;
+                    num2 = Math.floor(Math.random() * 9) + 1;
+                    break;
+                case 2:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 9) + 1;
+                        num2 = Math.floor(Math.random() * 90) + 10;
+                    } else {
+                        num1 = Math.floor(Math.random() * 90) + 10;
+                        num2 = Math.floor(Math.random() * 9) + 1;
+                    }
+                    break;
+                case 3:
+                    if (Math.random() > 0.3) {
+                        num1 = 0;
+                        num2 = Math.floor(Math.random() * 100);
+                    } else {
+                        num1 = Math.floor(Math.random() * 100);
+                        num2 = 0;
+                    }
+                    break;
+                case 4:
+                    num1 = -1 * (Math.floor(Math.random() * 12) + 1);
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    break;
+                case 5:
+                    if (Math.random() > 0.5) {
+                        num1 = -1 * (Math.floor(Math.random() * 12) + 1);
+                        num2 = Math.floor(Math.random() * 12) + 1;
+                    } else {
+                        num1 = -1 * (Math.floor(Math.random() * 12) + 1);
+                        num2 = -1 * (Math.floor(Math.random() * 12) + 1);
+                    }
+                    break;
+            }
+            
+            answer = num1 * num2;
+            
+            // Untuk level 3, jika kedua angka 0, jawaban adalah "tidak terdefinisi"
+            if (currentLevel === 3 && num1 === 0 && num2 === 0) {
+                return {
+                    question: `Berapakah hasil dari 0 × 0?`,
+                    answer: "tidak terdefinisi",
+                    options: ["0", "1", "tidak terdefinisi", "tak tentu"]
+                };
+            }
+            
+            return {
+                question: `Berapakah hasil dari ${num1} × ${num2}?`,
+                answer: answer,
+                options: generateOptions(answer, 30, true)
+            };
+        }
+        
+        // Fungsi pembuat soal pembagian
+        function generatePembagian() {
+            let num1, num2, answer;
+            
+            switch(currentLevel) {
+                case 1:
+                    num2 = Math.floor(Math.random() * 9) + 1;
+                    answer = Math.floor(Math.random() * 9) + 1;
+                    num1 = num2 * answer;
+                    break;
+                case 2:
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    answer = Math.floor(Math.random() * 12) + 1;
+                    num1 = num2 * answer;
+                    break;
+                case 3:
+                    if (Math.random() > 0.5) {
+                        num1 = Math.floor(Math.random() * 100);
+                        num2 = 0;
+                        answer = "tidak terdefinisi";
+                    } else {
+                        num1 = 0;
+                        num2 = Math.floor(Math.random() * 10) + 1;
+                        answer = 0;
+                    }
+                    break;
+                case 4:
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    answer = -1 * (Math.floor(Math.random() * 12) + 1);
+                    num1 = num2 * answer;
+                    break;
+                case 5:
+                    if (Math.random() > 0.5) {
+                        num2 = Math.floor(Math.random() * 12) + 1;
+                        answer = -1 * (Math.floor(Math.random() * 12) + 1);
+                        num1 = num2 * answer;
+                    } else {
+                        num2 = -1 * (Math.floor(Math.random() * 12) + 1);
+                        answer = Math.floor(Math.random() * 12) + 1;
+                        num1 = num2 * answer;
+                    }
+                    break;
+            }
+            
+            // Untuk kasus pembagian dengan 0
+            if (currentLevel === 3 && num2 === 0) {
+                return {
+                    question: `Berapakah hasil dari ${num1} ÷ ${num2}?`,
+                    answer: "tidak terdefinisi",
+                    options: ["0", "1", "tidak terdefinisi", "tak tentu"]
+                };
+            }
+            
+            return {
+                question: `Berapakah hasil dari ${num1} ÷ ${num2}?`,
+                answer: answer,
+                options: generateOptions(answer, 20, true)
+            };
+        }
+        
+        // Fungsi pembuat soal campuran perkalian dan pembagian
+        function generateCampuranPerkalianPembagian() {
+            if (Math.random() > 0.5) {
+                return generatePerkalian();
+            } else {
+                return generatePembagian();
+            }
+        }
+        
+        // Fungsi pembuat soal campuran semua operasi
+        function generateCampuranSemua() {
+            const operations = [
+                generatePenjumlahan,
+                generatePengurangan,
+                generatePerkalian,
+                generatePembagian
+            ];
+            
+            const randomOperation = operations[Math.floor(Math.random() * operations.length)];
+            return randomOperation();
+        }
+        
+        // Fungsi pembuat soal jenius (dua operasi)
+        function generateJenius() {
+            let num1, num2, num3, operation1, operation2, answer;
+            let questionText = "";
+            
+            switch(currentLevel) {
+                case 1:
+                    num1 = Math.floor(Math.random() * 9) + 1;
+                    num2 = Math.floor(Math.random() * 9) + 1;
+                    num3 = Math.floor(Math.random() * 9) + 1;
+                    
+                    operation1 = Math.random() > 0.5 ? "×" : "+";
+                    operation2 = Math.random() > 0.5 ? "+" : "-";
+                    
+                    if (operation1 === "×") {
+                        answer = num1 * num2;
+                        if (operation2 === "+") {
+                            answer += num3;
+                        } else {
+                            answer -= num3;
+                        }
+                    } else {
+                        answer = num1 + num2;
+                        if (operation2 === "+") {
+                            answer += num3;
+                        } else {
+                            answer -= num3;
+                        }
+                    }
+                    
+                    questionText = `Berapakah hasil dari ${num1} ${operation1} ${num2} ${operation2} ${num3}?`;
+                    break;
+                    
+                // Implementasi level 2-5 untuk jenius bisa dikembangkan lebih lanjut
+                default:
+                    num1 = Math.floor(Math.random() * 9) + 1;
+                    num2 = Math.floor(Math.random() * 9) + 1;
+                    num3 = Math.floor(Math.random() * 9) + 1;
+                    
+                    operation1 = "×";
+                    operation2 = "+";
+                    answer = num1 * num2 + num3;
+                    
+                    questionText = `Berapakah hasil dari ${num1} ${operation1} ${num2} ${operation2} ${num3}?`;
+                    break;
+            }
+            
+            return {
+                question: questionText,
+                answer: answer,
+                options: generateOptions(answer, 30, true)
+            };
+        }
+        
+        // Generate pilihan jawaban
+        function generateOptions(correctAnswer, range, allowNegative = false) {
+            // Jika jawaban adalah string (untuk kasus khusus seperti "tidak terdefinisi")
+            if (typeof correctAnswer === 'string') {
+                return ["0", "1", "tidak terdefinisi", "tak tentu"];
+            }
+            
+            const options = [correctAnswer];
+            
+            // Tambahkan jawaban yang salah
+            while (options.length < 4) {
+                // Buat angka acak di sekitar jawaban benar
+                const variation = Math.floor(Math.random() * range) + 1;
+                const sign = Math.random() > 0.5 ? 1 : -1;
+                let wrongAnswer = correctAnswer + (sign * variation);
+                
+                // Jika tidak mengizinkan negatif, pastikan jawaban tidak negatif
+                if (!allowNegative && wrongAnswer < 0) {
+                    wrongAnswer = Math.abs(wrongAnswer);
+                }
+                
+                // Pastikan jawaban salah tidak duplikat
+                if (!options.includes(wrongAnswer)) {
+                    options.push(wrongAnswer);
+                }
+            }
+            
+            // Acak urutan opsi
+            return shuffleArray(options);
+        }
+        
+        // Acak array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Tampilkan soal
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            questionElement.textContent = question.question;
+            
+            // Update progress bar
+            progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+            
+            // Update hewan berdasarkan progress
+            const animals = ['🐶', '🐱', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷'];
+            animalElement.textContent = animals[currentQuestion % animals.length];
+            
+            // Kosongkan opsi sebelumnya
+            optionsElement.innerHTML = '';
+            
+            // Tampilkan opsi jawaban
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-btn';
+                button.addEventListener('click', () => checkAnswer(option, button));
+                optionsElement.appendChild(button);
+            });
+            
+            // Reset tombol next
+            document.getElementById('next-question').disabled = true;
+        }
+        
+        // Periksa jawaban
+        function checkAnswer(selectedOption, buttonElement) {
+            const correctAnswer = questions[currentQuestion].answer;
+            const allButtons = optionsElement.querySelectorAll('.option-btn');
+            
+            // Nonaktifkan semua tombol
+            allButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            // Tandai jawaban benar/salah
+            if (selectedOption == correctAnswer) {
+                buttonElement.style.backgroundColor = '#4CAF50';
+                score++;
+            } else {
+                buttonElement.style.backgroundColor = '#FF5252';
+                // Tandai jawaban yang benar
+                allButtons.forEach(button => {
+                    if (button.textContent == correctAnswer) {
+                        button.style.backgroundColor = '#4CAF50';
+                    }
+                });
+            }
+            
+            // Aktifkan tombol next
+            document.getElementById('next-question').disabled = false;
+        }
+        
+        // Timer
+        function startTimer() {
+            timeLeft = 60;
+            timeElement.textContent = `Waktu: ${timeLeft} detik`;
+            
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                timeElement.textContent = `Waktu: ${timeLeft} detik`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showResults();
+                }
+            }, 1000);
+        }
+        
+        // Tampilkan hasil
+        function showResults() {
+            clearInterval(timer);
+            
+            quizScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+            
+            // Tampilkan skor
+            scoreElement.textContent = `${score}/${questions.length}`;
+            
+            // Tampilkan feedback berdasarkan skor
+            if (score >= 8) {
+                feedbackElement.textContent = "Luar biasa! Kamu jenius matematika! 🎓";
+                resultAnimalElement.textContent = "🏆";
+            } else if (score >= 5) {
+                feedbackElement.textContent = "Bagus! Terus berlatih ya! 👍";
+                resultAnimalElement.textContent = "🎉";
+            } else {
+                feedbackElement.textContent = "Jangan menyerah, coba lagi! 💪";
+                resultAnimalElement.textContent = "🤗";
+            }
+            
+            // Reset variabel
+            currentQuestion = 0;
+            score = 0;
+        }
+    </script>
+</body>
+</html>
