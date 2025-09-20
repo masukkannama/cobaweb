@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U8 Stream Fetcher - VideoPlayer Extension</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .input-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .search-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .search-btn:active {
+            transform: translateY(0);
+        }
+        
+        .search-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-section {
+            padding: 30px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .stream-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stream-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stream-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .stream-type {
+            background: #4facfe;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .stream-url {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e9ecef;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .extension-status {
+            text-align: center;
+            padding: 10px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .example-urls {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        
+        .example-urls a {
+            color: #4facfe;
+            text-decoration: none;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .example-urls a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 M3U8 Stream Fetcher</h1>
+            <p>Ambil data streaming menggunakan ekstensi VideoPlayer</p>
+        </div>
+        
+        <div class="input-section">
+            <div id="extensionStatus" class="extension-status">
+                🔍 Mengecek ketersediaan ekstensi...
+            </div>
+            
+            <input 
+                type="url" 
+                id="urlInput" 
+                class="url-input" 
+                placeholder="Masukkan URL halaman streaming (contoh: https://missav.ws/dm2/en/cawd-317-uncensored-leak)"
+                value="https://missav.ws/dm2/en/cawd-317-uncensored-leak"
+            >
+            
+            <button id="searchBtn" class="search-btn" disabled>
+                <span id="btnText">🔍 Cari Stream</span>
+                <span id="btnLoading" class="loading" style="display: none;"></span>
+            </button>
+            
+            <div class="example-urls">
+                Contoh: 
+                <a onclick="setExampleUrl('https://missav.ws/dm2/en/cawd-317-uncensored-leak')">MissAV</a>
+                <a onclick="setExampleUrl('https://www.youtube.com')">YouTube</a>
+                <a onclick="setExampleUrl('https://www.twitch.tv')">Twitch</a>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <div id="status" class="status">
+                Masukkan URL dan klik "Cari Stream" untuk memulai
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const EXTENSION_ID = 'opmeopcambhfimffbomjgemehjkbbmji';
+        
+        // Elements
+        const urlInput = document.getElementById('urlInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const status = document.getElementById('status');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const extensionStatus = document.getElementById('extensionStatus');
+        
+        // Check extension availability
+        async function checkExtension() {
+            try {
+                // @ts-ignore
+                if (typeof chrome === 'undefined' || !chrome.runtime) {
+                    extensionStatus.innerHTML = '❌ Browser tidak mendukung ekstensi Chrome';
+                    return false;
+                }
+                
+                // Try to send ping message to extension
+                // @ts-ignore
+                await new Promise((resolve, reject) => {
+                    chrome.runtime.sendMessage(EXTENSION_ID, { action: 'ping' }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(response);
+                        }
+                    });
+                });
+                
+                extensionStatus.innerHTML = '✅ Ekstensi VideoPlayer terdeteksi dan siap digunakan';
+                searchBtn.disabled = false;
+                return true;
+                
+            } catch (err) {
+                extensionStatus.innerHTML = '❌ Ekstensi VideoPlayer tidak ditemukan. Pastikan ekstensi sudah diinstall dan aktif.';
+                searchBtn.disabled = true;
+                return false;
+            }
+        }
+        
+        // Set example URL
+        function setExampleUrl(url) {
+            urlInput.value = url;
+            urlInput.focus();
+        }
+        
+        // Fetch streams from extension
+        async function fetchStreams() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Silakan masukkan URL terlebih dahulu');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch {
+                showError('URL tidak valid. Pastikan URL dimulai dengan http:// atau https://');
+                return;
+            }
+            
+            setLoading(true);
+            hideError();
+            results.innerHTML = '';
+            status.textContent = '🔄 Sedang mencari stream...';
+            
+            try {
+                const streamData = await getStreamsFromExtension(url);
+                displayResults(streamData);
+                
+            } catch (err) {
+                showError('Gagal mengambil data: ' + err.message);
+                status.textContent = '❌ Gagal mengambil data stream';
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Get streams from extension
+        async function getStreamsFromExtension(url) {
+            return new Promise((resolve, reject) => {
+                // @ts-ignore
+                chrome.runtime.sendMessage(
+                    EXTENSION_ID,
+                    {
+                        action: 'getStreams',
+                        url: url,
+                        type: 'm3u8'
+                    },
+                    (response) => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else if (response && response.success) {
+                            resolve(response.data);
+                        } else {
+                            reject(new Error(response?.error || 'Tidak ada stream yang ditemukan'));
+                        }
+                    }
+                );
+            });
+        }
+        
+        // Display results
+        function displayResults(streamData) {
+            results.innerHTML = '';
+            
+            if (!streamData || streamData.length === 0) {
+                status.textContent = '❌ Tidak ada stream yang ditemukan pada halaman tersebut';
+                return;
+            }
+            
+            status.textContent = `✅ Ditemukan ${streamData.length} stream`;
+            
+            streamData.forEach((stream, index) => {
+                const streamCard = document.createElement('div');
+                streamCard.className = 'stream-card';
+                
+                streamCard.innerHTML = `
+                    <div class="stream-header">
+                        <span class="stream-title">Stream ${index + 1}</span>
+                        <span class="stream-type">${stream.type || 'M3U8'}</span>
+                    </div>
+                    <div class="stream-url">${stream.url}</div>
+                    <button class="copy-btn" onclick="copyToClipboard('${stream.url.replace(/'/g, "\\'")}')">
+                        📋 Copy URL
+                    </button>
+                `;
+                
+                results.appendChild(streamCard);
+            });
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('URL berhasil disalin ke clipboard!');
+            }).catch(err => {
+                alert('Gagal menyalin URL: ' + err);
+            });
+        }
+        
+        // Show error
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+        
+        // Hide error
+        function hideError() {
+            error.style.display = 'none';
+        }
+        
+        // Set loading state
+        function setLoading(loading) {
+            if (loading) {
+                btnText.textContent = 'Mencari...';
+                btnLoading.style.display = 'inline-block';
+                searchBtn.disabled = true;
+            } else {
+                btnText.textContent = '🔍 Cari Stream';
+                btnLoading.style.display = 'none';
+                searchBtn.disabled = false;
+            }
+        }
+        
+        // Event listeners
+        searchBtn.addEventListener('click', fetchStreams);
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                fetchStreams();
+            }
+        });
+        
+        // Initialize
+        checkExtension();
+    </script>
+</body>
+</html>
