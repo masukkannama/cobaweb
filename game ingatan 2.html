@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Menguji Kekuatan Ingatan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-category {
+            width: 200px;
+            height: 60px;
+            font-size: 18px;
+        }
+        
+        .btn-level {
+            width: 120px;
+            height: 50px;
+            font-size: 18px;
+            margin: 8px;
+        }
+        
+        .btn-number {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            margin: 5px;
+        }
+        
+        .btn-image {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            padding: 5px;
+            background-color: #ecf0f1;
+            border: 2px solid #bdc3c7;
+        }
+        
+        .btn-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .btn-selected {
+            background-color: #2ecc71;
+            border-color: #27ae60;
+        }
+        
+        .btn-remove {
+            background-color: #e74c3c;
+            width: 120px;
+        }
+        
+        .btn-remove:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-submit {
+            background-color: #2ecc71;
+            font-size: 18px;
+            padding: 15px 30px;
+            width: 120px;
+        }
+        
+        .btn-submit:hover {
+            background-color: #27ae60;
+        }
+        
+        .question-display {
+            font-size: 36px;
+            margin: 30px 0;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .question-image {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            font-size: 40px;
+        }
+        
+        .timer {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .answer-display {
+            min-height: 80px;
+            margin: 20px 0;
+            font-size: 24px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .answer-box {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            margin: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background-color: #f8f9fa;
+        }
+        
+        .answer-box.filled {
+            background-color: #e8f4fc;
+        }
+        
+        .level-info {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .progress-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #bdc3c7;
+            margin: 0 5px;
+        }
+        
+        .progress-dot.active {
+            background-color: #3498db;
+        }
+        
+        .progress-dot.correct {
+            background-color: #2ecc71;
+        }
+        
+        .progress-dot.incorrect {
+            background-color: #e74c3c;
+        }
+        
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ecf0f1;
+        }
+        
+        .result-correct {
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .result-incorrect {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .summary {
+            text-align: left;
+            margin-top: 30px;
+        }
+        
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: 220px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .level-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Layar Menu Utama -->
+        <div id="main-menu" class="screen active">
+            <h1>Game Menguji Kekuatan Ingatan</h1>
+            <p>Pilih kategori untuk memulai permainan:</p>
+            <button id="btn-number" class="btn btn-category">Ingatan Angka</button>
+            <button id="btn-image" class="btn btn-category">Ingatan Gambar</button>
+            
+            <div class="instructions">
+                <h3>Cara Bermain:</h3>
+                <ul>
+                    <li>Pilih kategori dan level yang diinginkan</li>
+                    <li>Hafalkan urutan angka/gambar yang ditampilkan</li>
+                    <li>Setelah waktu menghafal habis, pilih jawaban dengan urutan yang benar</li>
+                    <li>Setiap level memiliki jumlah item yang berbeda (Level 1: 4 item, Level 2: 5 item, dst.)</li>
+                    <li>Kategori gambar memiliki waktu menghafal dan menjawab 2x lebih lama</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Layar Pilih Level -->
+        <div id="level-screen" class="screen">
+            <h1 id="level-title">Pilih Level</h1>
+            <p>Kategori: <span id="selected-category">Ingatan Angka</span></p>
+            <div class="level-container" id="level-buttons">
+                <!-- Tombol level akan ditampilkan di sini -->
+            </div>
+            <button id="btn-back-category" class="btn">Kembali</button>
+        </div>
+        
+        <!-- Layar Permainan -->
+        <div id="game-screen" class="screen">
+            <h1 id="game-title">Ingatan Angka</h1>
+            <div class="level-info">
+                Level <span id="current-level">1</span> - Pertanyaan <span id="current-question">1</span>/5
+                (Jumlah item: <span id="item-count">4</span>)
+            </div>
+            
+            <div class="progress" id="progress-dots"></div>
+            
+            <div class="timer" id="timer">Waktu: 10 detik</div>
+            
+            <div class="question-display" id="question-display">
+                <!-- Angka atau gambar akan ditampilkan di sini -->
+            </div>
+            
+            <div class="answer-display" id="answer-display">
+                <!-- Kotak jawaban akan ditampilkan di sini -->
+            </div>
+            
+            <div id="answer-options">
+                <!-- Tombol angka atau gambar akan ditampilkan di sini -->
+            </div>
+            
+            <div class="action-buttons">
+                <button id="btn-remove" class="btn btn-remove">Hapus</button>
+                <button id="btn-submit" class="btn btn-submit">Selesai</button>
+            </div>
+        </div>
+        
+        <!-- Layar Hasil -->
+        <div id="result-screen" class="screen">
+            <h1>Hasil Permainan</h1>
+            <div class="score" id="final-score">Skor: 0/50</div>
+            
+            <div class="summary" id="result-summary">
+                <!-- Rangkuman jawaban akan ditampilkan di sini -->
+            </div>
+            
+            <button id="btn-restart" class="btn">Main Lagi</button>
+            <button id="btn-main-menu" class="btn">Menu Utama</button>
+        </div>
+    </div>
+
+    <script>
+        // Data game
+        const gameData = {
+            category: null, // 'number' atau 'image'
+            level: 1,
+            currentQuestion: 1,
+            questions: [],
+            userAnswers: [],
+            correctAnswers: [],
+            score: 0,
+            timer: null,
+            timeLeft: 0,
+            memorizationTime: 3, // Waktu menghafal default
+            answeringTime: 10, // Waktu menjawab default
+            itemCount: 4 // Jumlah item default (Level 1)
+        };
+
+        // Data gambar
+        const images = [
+            '🍎', '🚗', '🏠', '🐱', '⚽',
+            '📱', '🎸', '🌳', '👓', '⌚'
+        ];
+
+        // Elemen DOM
+        const mainMenu = document.getElementById('main-menu');
+        const levelScreen = document.getElementById('level-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const btnNumber = document.getElementById('btn-number');
+        const btnImage = document.getElementById('btn-image');
+        const btnBackCategory = document.getElementById('btn-back-category');
+        const btnRemove = document.getElementById('btn-remove');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnMainMenu = document.getElementById('btn-main-menu');
+        
+        const levelTitle = document.getElementById('level-title');
+        const selectedCategory = document.getElementById('selected-category');
+        const levelButtons = document.getElementById('level-buttons');
+        const gameTitle = document.getElementById('game-title');
+        const currentLevel = document.getElementById('current-level');
+        const currentQuestion = document.getElementById('current-question');
+        const itemCountDisplay = document.getElementById('item-count');
+        const progressDots = document.getElementById('progress-dots');
+        const timerDisplay = document.getElementById('timer');
+        const questionDisplay = document.getElementById('question-display');
+        const answerDisplay = document.getElementById('answer-display');
+        const answerOptions = document.getElementById('answer-options');
+        const finalScore = document.getElementById('final-score');
+        const resultSummary = document.getElementById('result-summary');
+
+        // Event listeners
+        btnNumber.addEventListener('click', () => selectCategory('number'));
+        btnImage.addEventListener('click', () => selectCategory('image'));
+        btnBackCategory.addEventListener('click', showMainMenu);
+        btnRemove.addEventListener('click', removeLastAnswer);
+        btnSubmit.addEventListener('click', submitAnswer);
+        btnRestart.addEventListener('click', restartGame);
+        btnMainMenu.addEventListener('click', showMainMenu);
+
+        // Fungsi untuk memilih kategori
+        function selectCategory(category) {
+            gameData.category = category;
+            
+            // Set waktu berdasarkan kategori
+            if (category === 'image') {
+                gameData.memorizationTime = 6; // 2x lebih lama untuk gambar
+                gameData.answeringTime = 20;
+            } else {
+                gameData.memorizationTime = 3;
+                gameData.answeringTime = 10;
+            }
+            
+            // Update tampilan
+            selectedCategory.textContent = category === 'number' ? 'Ingatan Angka' : 'Ingatan Gambar';
+            levelTitle.textContent = `Pilih Level - ${selectedCategory.textContent}`;
+            
+            // Tampilkan tombol level
+            displayLevelButtons();
+            
+            // Tampilkan layar pilih level
+            showScreen(levelScreen);
+        }
+
+        // Fungsi untuk menampilkan tombol level
+        function displayLevelButtons() {
+            levelButtons.innerHTML = '';
+            
+            for (let i = 1; i <= 10; i++) {
+                const itemCount = i + 3; // Level 1: 4 item, Level 2: 5 item, dst.
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-level';
+                btn.textContent = `Level ${i} (${itemCount} item)`;
+                btn.addEventListener('click', () => startGame(i));
+                levelButtons.appendChild(btn);
+            }
+        }
+
+        // Fungsi untuk memulai permainan
+        function startGame(level) {
+            gameData.level = level;
+            gameData.currentQuestion = 1;
+            gameData.questions = [];
+            gameData.userAnswers = [];
+            gameData.correctAnswers = [];
+            gameData.score = 0;
+            gameData.itemCount = level + 3; // Level 1: 4 item, Level 2: 5 item, dst.
+            
+            // Set judul berdasarkan kategori
+            gameTitle.textContent = gameData.category === 'number' ? 'Ingatan Angka' : 'Ingatan Gambar';
+            
+            // Generate pertanyaan untuk level saat ini
+            generateQuestions();
+            
+            // Tampilkan layar permainan
+            showScreen(gameScreen);
+            
+            // Mulai pertanyaan pertama
+            startQuestion();
+        }
+
+        // Fungsi untuk menghasilkan pertanyaan
+        function generateQuestions() {
+            for (let i = 0; i < 5; i++) {
+                if (gameData.category === 'number') {
+                    // Generate angka acak
+                    const numbers = [];
+                    for (let j = 0; j < gameData.itemCount; j++) {
+                        numbers.push(Math.floor(Math.random() * 10));
+                    }
+                    gameData.questions.push(numbers);
+                } else {
+                    // Generate gambar acak
+                    const imageSet = [];
+                    const usedIndices = new Set();
+                    
+                    for (let j = 0; j < gameData.itemCount; j++) {
+                        let randomIndex;
+                        do {
+                            randomIndex = Math.floor(Math.random() * images.length);
+                        } while (usedIndices.has(randomIndex));
+                        
+                        usedIndices.add(randomIndex);
+                        imageSet.push(images[randomIndex]);
+                    }
+                    
+                    gameData.questions.push(imageSet);
+                }
+            }
+        }
+
+        // Fungsi untuk memulai pertanyaan
+        function startQuestion() {
+            // Reset data pertanyaan
+            gameData.userAnswers[gameData.currentQuestion - 1] = [];
+            
+            // Update tampilan level dan pertanyaan
+            currentLevel.textContent = gameData.level;
+            currentQuestion.textContent = gameData.currentQuestion;
+            itemCountDisplay.textContent = gameData.itemCount;
+            
+            // Update progress dots
+            updateProgressDots();
+            
+            // Tampilkan pertanyaan
+            displayQuestion();
+            
+            // Buat kotak jawaban sesuai jumlah item
+            createAnswerBoxes();
+            
+            // Set timer untuk menghafal
+            gameData.timeLeft = gameData.memorizationTime;
+            timerDisplay.textContent = `Hafalkan: ${gameData.timeLeft} detik`;
+            timerDisplay.style.color = '#3498db';
+            
+            // Mulai timer menghafal
+            startMemorizationTimer();
+        }
+
+        // Fungsi untuk membuat kotak jawaban sesuai jumlah item
+        function createAnswerBoxes() {
+            answerDisplay.innerHTML = '';
+            
+            for (let i = 0; i < gameData.itemCount; i++) {
+                const box = document.createElement('div');
+                box.className = 'answer-box';
+                box.id = `answer-box-${i}`;
+                box.textContent = '☐';
+                answerDisplay.appendChild(box);
+            }
+        }
+
+        // Fungsi untuk menampilkan pertanyaan
+        function displayQuestion() {
+            const questionIndex = gameData.currentQuestion - 1;
+            const question = gameData.questions[questionIndex];
+            
+            questionDisplay.innerHTML = '';
+            
+            if (gameData.category === 'number') {
+                question.forEach(number => {
+                    const numberElement = document.createElement('span');
+                    numberElement.textContent = number;
+                    numberElement.style.margin = '0 10px';
+                    numberElement.style.fontSize = '40px';
+                    questionDisplay.appendChild(numberElement);
+                });
+            } else {
+                question.forEach(image => {
+                    const imageElement = document.createElement('div');
+                    imageElement.className = 'question-image';
+                    imageElement.textContent = image;
+                    questionDisplay.appendChild(imageElement);
+                });
+            }
+            
+            // Tampilkan pilihan jawaban
+            displayAnswerOptions();
+        }
+
+        // Fungsi untuk menampilkan pilihan jawaban
+        function displayAnswerOptions() {
+            answerOptions.innerHTML = '';
+            
+            if (gameData.category === 'number') {
+                // Buat grid untuk angka
+                const numberGrid = document.createElement('div');
+                numberGrid.className = 'number-grid';
+                
+                // Tambahkan angka 1-9
+                for (let i = 1; i <= 9; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-number';
+                    btn.textContent = i;
+                    btn.addEventListener('click', () => addToAnswer(i));
+                    numberGrid.appendChild(btn);
+                }
+                
+                answerOptions.appendChild(numberGrid);
+                
+                // Tambahkan tombol aksi
+                const actionGrid = document.createElement('div');
+                actionGrid.className = 'action-buttons';
+                
+                const btn0 = document.createElement('button');
+                btn0.className = 'btn btn-number';
+                btn0.textContent = '0';
+                btn0.addEventListener('click', () => addToAnswer(0));
+                
+                actionGrid.appendChild(btn0);
+                
+                answerOptions.appendChild(actionGrid);
+            } else {
+                // Tampilkan semua gambar
+                for (let i = 0; i < images.length; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-image';
+                    
+                    const img = document.createElement('span');
+                    img.textContent = images[i];
+                    img.style.fontSize = '30px';
+                    
+                    btn.appendChild(img);
+                    btn.addEventListener('click', () => addToAnswer(images[i]));
+                    answerOptions.appendChild(btn);
+                    
+                    if (i % 3 === 2 && i < 9) {
+                        answerOptions.appendChild(document.createElement('br'));
+                    }
+                }
+            }
+        }
+
+        // Fungsi untuk menambahkan jawaban
+        function addToAnswer(item) {
+            const questionIndex = gameData.currentQuestion - 1;
+            const userAnswer = gameData.userAnswers[questionIndex];
+            
+            // Cek apakah sudah mencapai batas jumlah item
+            if (userAnswer.length >= gameData.itemCount) {
+                return; // Sudah mencapai batas, tidak bisa menambah lagi
+            }
+            
+            userAnswer.push(item);
+            
+            // Update tampilan kotak jawaban
+            updateAnswerBoxes();
+        }
+
+        // Fungsi untuk memperbarui tampilan kotak jawaban
+        function updateAnswerBoxes() {
+            const questionIndex = gameData.currentQuestion - 1;
+            const userAnswer = gameData.userAnswers[questionIndex];
+            
+            // Reset semua kotak
+            for (let i = 0; i < gameData.itemCount; i++) {
+                const box = document.getElementById(`answer-box-${i}`);
+                box.textContent = '☐';
+                box.classList.remove('filled');
+            }
+            
+            // Isi kotak dengan jawaban
+            for (let i = 0; i < userAnswer.length; i++) {
+                const box = document.getElementById(`answer-box-${i}`);
+                box.textContent = userAnswer[i];
+                box.classList.add('filled');
+            }
+        }
+
+        // Fungsi untuk menghapus jawaban terakhir
+        function removeLastAnswer() {
+            const questionIndex = gameData.currentQuestion - 1;
+            const userAnswer = gameData.userAnswers[questionIndex];
+            
+            if (userAnswer.length > 0) {
+                userAnswer.pop();
+                updateAnswerBoxes();
+            }
+        }
+
+        // Fungsi untuk memulai timer menghafal
+        function startMemorizationTimer() {
+            clearInterval(gameData.timer);
+            
+            gameData.timer = setInterval(() => {
+                gameData.timeLeft--;
+                timerDisplay.textContent = `Hafalkan: ${gameData.timeLeft} detik`;
+                
+                if (gameData.timeLeft <= 0) {
+                    clearInterval(gameData.timer);
+                    // Sembunyikan pertanyaan
+                    questionDisplay.innerHTML = '';
+                    // Mulai timer menjawab
+                    startAnsweringTimer();
+                }
+            }, 1000);
+        }
+
+        // Fungsi untuk memulai timer menjawab
+        function startAnsweringTimer() {
+            gameData.timeLeft = gameData.answeringTime;
+            timerDisplay.textContent = `Waktu: ${gameData.timeLeft} detik`;
+            timerDisplay.style.color = '#e74c3c';
+            
+            gameData.timer = setInterval(() => {
+                gameData.timeLeft--;
+                timerDisplay.textContent = `Waktu: ${gameData.timeLeft} detik`;
+                
+                if (gameData.timeLeft <= 0) {
+                    clearInterval(gameData.timer);
+                    // Otomatis submit jika waktu habis
+                    submitAnswer();
+                }
+            }, 1000);
+        }
+
+        // Fungsi untuk submit jawaban
+        function submitAnswer() {
+            clearInterval(gameData.timer);
+            
+            const questionIndex = gameData.currentQuestion - 1;
+            const correctAnswer = gameData.questions[questionIndex];
+            const userAnswer = gameData.userAnswers[questionIndex];
+            
+            // Simpan jawaban yang benar
+            gameData.correctAnswers[questionIndex] = correctAnswer;
+            
+            // Periksa apakah jawaban benar
+            let isCorrect = true;
+            
+            if (userAnswer.length !== correctAnswer.length) {
+                isCorrect = false;
+            } else {
+                for (let i = 0; i < correctAnswer.length; i++) {
+                    if (userAnswer[i] !== correctAnswer[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Update skor
+            if (isCorrect) {
+                gameData.score += 10;
+            }
+            
+            // Update progress dots
+            updateProgressDots(isCorrect);
+            
+            // Lanjut ke pertanyaan berikutnya atau tampilkan hasil
+            if (gameData.currentQuestion < 5) {
+                gameData.currentQuestion++;
+                setTimeout(startQuestion, 1500);
+            } else {
+                // Tampilkan hasil
+                setTimeout(showResults, 1500);
+            }
+        }
+
+        // Fungsi untuk memperbarui progress dots
+        function updateProgressDots(isCorrect = null) {
+            progressDots.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                
+                if (i < gameData.currentQuestion - 1) {
+                    // Pertanyaan sudah selesai
+                    if (gameData.userAnswers[i] && 
+                        JSON.stringify(gameData.userAnswers[i]) === JSON.stringify(gameData.correctAnswers[i])) {
+                        dot.classList.add('correct');
+                    } else {
+                        dot.classList.add('incorrect');
+                    }
+                } else if (i === gameData.currentQuestion - 1) {
+                    // Pertanyaan saat ini
+                    dot.classList.add('active');
+                    
+                    if (isCorrect !== null) {
+                        dot.classList.add(isCorrect ? 'correct' : 'incorrect');
+                    }
+                }
+                
+                progressDots.appendChild(dot);
+            }
+        }
+
+        // Fungsi untuk menampilkan hasil
+        function showResults() {
+            showScreen(resultScreen);
+            
+            // Tampilkan skor
+            finalScore.textContent = `Skor: ${gameData.score}/50`;
+            
+            // Tampilkan rangkuman jawaban
+            resultSummary.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                const isCorrect = JSON.stringify(gameData.userAnswers[i]) === 
+                                 JSON.stringify(gameData.correctAnswers[i]);
+                
+                resultItem.classList.add(isCorrect ? 'result-correct' : 'result-incorrect');
+                
+                const questionText = document.createElement('div');
+                questionText.innerHTML = `<strong>Pertanyaan ${i+1}:</strong> `;
+                
+                if (gameData.category === 'number') {
+                    questionText.innerHTML += gameData.correctAnswers[i].join(' ');
+                } else {
+                    questionText.innerHTML += gameData.correctAnswers[i].map(item => 
+                        `<span style="font-size: 20px;">${item}</span>`
+                    ).join(' ');
+                }
+                
+                const userAnswerText = document.createElement('div');
+                userAnswerText.innerHTML = `<strong>Jawaban Anda:</strong> `;
+                
+                if (gameData.category === 'number') {
+                    userAnswerText.innerHTML += gameData.userAnswers[i] ? 
+                        gameData.userAnswers[i].join(' ') : '(Tidak dijawab)';
+                } else {
+                    userAnswerText.innerHTML += gameData.userAnswers[i] ? 
+                        gameData.userAnswers[i].map(item => 
+                            `<span style="font-size: 20px;">${item}</span>`
+                        ).join(' ') : '(Tidak dijawab)';
+                }
+                
+                const statusText = document.createElement('div');
+                statusText.innerHTML = isCorrect ? 
+                    '<span style="color: #2ecc71;">✓ Benar</span>' : 
+                    '<span style="color: #e74c3c;">✗ Salah</span>';
+                
+                resultItem.appendChild(questionText);
+                resultItem.appendChild(userAnswerText);
+                resultItem.appendChild(statusText);
+                
+                resultSummary.appendChild(resultItem);
+            }
+        }
+
+        // Fungsi untuk memulai ulang permainan
+        function restartGame() {
+            gameData.currentQuestion = 1;
+            gameData.questions = [];
+            gameData.userAnswers = [];
+            gameData.correctAnswers = [];
+            gameData.score = 0;
+            
+            generateQuestions();
+            showScreen(gameScreen);
+            startQuestion();
+        }
+
+        // Fungsi untuk kembali ke menu utama
+        function showMainMenu() {
+            showScreen(mainMenu);
+        }
+
+        // Fungsi utilitas untuk menampilkan layar
+        function showScreen(screen) {
+            mainMenu.classList.remove('active');
+            levelScreen.classList.remove('active');
+            gameScreen.classList.remove('active');
+            resultScreen.classList.remove('active');
+            
+            screen.classList.add('active');
+        }
+    </script>
+</body>
+</html>
