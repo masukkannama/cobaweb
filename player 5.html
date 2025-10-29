@@ -243,7 +243,6 @@
             border-radius: 10px;
             padding: 12px;
             margin-top: 15px;
-            border-left: 4px solid var(--accent-color);
             font-size: 0.8rem;
         }
         
@@ -384,38 +383,6 @@
                 </div>
             </div>
             
-            <div class="keyboard-shortcuts">
-                <h5><i class="fas fa-keyboard me-2"></i>Kontrol Keyboard:</h5>
-                <div class="shortcut-item">
-                    <span>Play/Pause</span>
-                    <span class="shortcut-key">Spasi</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Maju 10 detik</span>
-                    <span class="shortcut-key">→</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Mundur 10 detik</span>
-                    <span class="shortcut-key">←</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Volume Naik</span>
-                    <span class="shortcut-key">↑</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Volume Turun</span>
-                    <span class="shortcut-key">↓</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Mute/Unmute</span>
-                    <span class="shortcut-key">M</span>
-                </div>
-                <div class="shortcut-item">
-                    <span>Layar Penuh</span>
-                    <span class="shortcut-key">F</span>
-                </div>
-            </div>
-            
             <div class="controls">
                 <div class="input-group">
                     <input type="text" id="stream-url" class="form-control" placeholder="Masukkan URL stream M3U8 di sini..." value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
@@ -475,6 +442,55 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="force-hls">
                                 <label class="form-check-label" for="force-hls">Paksa HLS.js</label>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Kontrol Keyboard sebagai dropdown terpisah -->
+                <div class="advanced-options">
+                    <details>
+                        <summary>Kontrol Keyboard</summary>
+                        <div class="keyboard-shortcuts mt-3">
+                            <div class="shortcut-item">
+                                <span>Play/Pause</span>
+                                <span class="shortcut-key">Spasi</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Maju 10 detik</span>
+                                <span class="shortcut-key">→</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Mundur 10 detik</span>
+                                <span class="shortcut-key">←</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Volume Naik</span>
+                                <span class="shortcut-key">↑</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Volume Turun</span>
+                                <span class="shortcut-key">↓</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Mute/Unmute</span>
+                                <span class="shortcut-key">M</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Layar Penuh</span>
+                                <span class="shortcut-key">F</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Peningkatan Kecepatan</span>
+                                <span class="shortcut-key">Shift + →</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Penurunan Kecepatan</span>
+                                <span class="shortcut-key">Shift + ←</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Kecepatan Normal</span>
+                                <span class="shortcut-key">Shift + N</span>
                             </div>
                         </div>
                     </details>
@@ -769,12 +785,28 @@
                             
                         case 'ArrowRight':
                             e.preventDefault();
-                            player.currentTime(player.currentTime() + 10);
+                            if (e.shiftKey) {
+                                // Shift + Right: Increase playback rate
+                                const currentRate = player.playbackRate();
+                                const newRate = Math.min(currentRate + 0.25, 2);
+                                player.playbackRate(newRate);
+                            } else {
+                                // Right arrow: Skip forward 10 seconds
+                                player.currentTime(player.currentTime() + 10);
+                            }
                             break;
                             
                         case 'ArrowLeft':
                             e.preventDefault();
-                            player.currentTime(player.currentTime() - 10);
+                            if (e.shiftKey) {
+                                // Shift + Left: Decrease playback rate
+                                const currentRate = player.playbackRate();
+                                const newRate = Math.max(currentRate - 0.25, 0.5);
+                                player.playbackRate(newRate);
+                            } else {
+                                // Left arrow: Skip backward 10 seconds
+                                player.currentTime(player.currentTime() - 10);
+                            }
                             break;
                             
                         case 'ArrowUp':
@@ -800,6 +832,15 @@
                                 player.exitFullscreen();
                             } else {
                                 player.requestFullscreen();
+                            }
+                            break;
+                            
+                        case 'n':
+                        case 'N':
+                            if (e.shiftKey) {
+                                e.preventDefault();
+                                // Shift + N: Reset playback rate to normal
+                                player.playbackRate(1);
                             }
                             break;
                     }
