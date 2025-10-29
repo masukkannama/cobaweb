@@ -12,13 +12,13 @@
             color: #fff;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
         }
         .container {
             max-width: 1200px;
             margin-top: 30px;
-            margin-left: 20px; /* Mengubah margin kiri */
-            margin-right: auto; /* Tetap auto untuk responsif */
             padding-bottom: 50px;
+            transition: all 0.3s ease;
         }
         .player-container {
             background: rgba(0, 0, 0, 0.7);
@@ -71,7 +71,7 @@
             border: 1px solid #555;
         }
         .title {
-            text-align: left; /* Mengubah dari center ke left */
+            text-align: left;
             margin-bottom: 30px;
         }
         .title h1 {
@@ -101,9 +101,51 @@
         .quality-selector {
             margin-top: 15px;
         }
+        
+        /* Alignment Controls */
+        .alignment-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .alignment-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid #ff5500;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .alignment-btn:hover {
+            background: #ff5500;
+            transform: translateY(-2px);
+        }
+        .alignment-btn.active {
+            background: #ff5500;
+            box-shadow: 0 0 10px rgba(255, 85, 0, 0.7);
+        }
+        
+        /* Alignment Classes */
+        .align-left {
+            margin-left: 20px;
+            margin-right: auto;
+        }
+        .align-center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .align-right {
+            margin-left: auto;
+            margin-right: 20px;
+        }
+        
         @media (max-width: 768px) {
             .container {
-                margin-left: 10px; /* Mengurangi margin kiri pada perangkat kecil */
+                margin-left: 10px;
                 margin-right: 10px;
             }
             .controls {
@@ -113,11 +155,19 @@
                 width: 100%;
                 margin-bottom: 10px;
             }
+            .alignment-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .alignment-btn {
+                margin: 5px 0;
+                width: 80%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container align-left">
         <div class="title">
             <h1><i class="fas fa-play-circle"></i> Pemutar Video M3U8/M3U</h1>
             <p>Putar video streaming dengan mudah langsung dari browser</p>
@@ -159,6 +209,19 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Alignment Controls -->
+            <div class="alignment-controls">
+                <button id="align-left-btn" class="alignment-btn active">
+                    <i class="fas fa-align-left"></i> Rata Kiri
+                </button>
+                <button id="align-center-btn" class="alignment-btn">
+                    <i class="fas fa-align-center"></i> Rata Tengah
+                </button>
+                <button id="align-right-btn" class="alignment-btn">
+                    <i class="fas fa-align-right"></i> Rata Kanan
+                </button>
+            </div>
         </div>
         
         <div class="instructions">
@@ -169,6 +232,7 @@
                 <li>Klik tombol "Putar" untuk memulai streaming</li>
                 <li>Gunakan kontrol video untuk mengatur pemutaran</li>
                 <li>Gunakan tombol volume atau layar penuh sesuai kebutuhan</li>
+                <li>Gunakan tombol alignment untuk mengatur posisi player</li>
             </ol>
             <p class="mt-3"><strong>Catatan:</strong> Beberapa stream mungkin tidak dapat diputar karena pembatasan CORS atau format yang tidak didukung.</p>
         </div>
@@ -184,6 +248,12 @@
             const volumeUpBtn = document.getElementById('volume-up');
             const fullscreenBtn = document.getElementById('fullscreen-btn');
             const qualitySelect = document.getElementById('quality-select');
+            
+            // Alignment buttons
+            const alignLeftBtn = document.getElementById('align-left-btn');
+            const alignCenterBtn = document.getElementById('align-center-btn');
+            const alignRightBtn = document.getElementById('align-right-btn');
+            const container = document.querySelector('.container');
             
             let hls = null;
             
@@ -243,7 +313,42 @@
                 }
             }
             
-            // Event listeners
+            // Fungsi untuk mengatur alignment
+            function setAlignment(alignment) {
+                // Hapus semua kelas alignment
+                container.classList.remove('align-left', 'align-center', 'align-right');
+                
+                // Tambahkan kelas alignment yang dipilih
+                container.classList.add(alignment);
+                
+                // Update status aktif tombol
+                alignLeftBtn.classList.remove('active');
+                alignCenterBtn.classList.remove('active');
+                alignRightBtn.classList.remove('active');
+                
+                if (alignment === 'align-left') {
+                    alignLeftBtn.classList.add('active');
+                } else if (alignment === 'align-center') {
+                    alignCenterBtn.classList.add('active');
+                } else if (alignment === 'align-right') {
+                    alignRightBtn.classList.add('active');
+                }
+            }
+            
+            // Event listeners untuk alignment
+            alignLeftBtn.addEventListener('click', function() {
+                setAlignment('align-left');
+            });
+            
+            alignCenterBtn.addEventListener('click', function() {
+                setAlignment('align-center');
+            });
+            
+            alignRightBtn.addEventListener('click', function() {
+                setAlignment('align-right');
+            });
+            
+            // Event listeners lainnya
             playBtn.addEventListener('click', playStream);
             
             volumeDownBtn.addEventListener('click', function() {
