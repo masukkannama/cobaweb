@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teka-Teki 3 Guci - Solver Interaktif</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .tab.active {
+            background-color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .jugs-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .jug {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 140px;
+        }
+        
+        .jug-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .jug-graphic {
+            width: 100px;
+            height: 200px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 3px solid white;
+            border-bottom: 8px solid white;
+            border-radius: 0 0 25px 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, #1e90ff, #00bfff);
+            transition: height 0.5s ease;
+            border-radius: 0 0 22px 22px;
+        }
+        
+        .water-level {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+        
+        .jug-capacity {
+            margin-top: 10px;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .jug-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .jug-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .fill-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .fill-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .empty-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .empty-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .transfer-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .transfer-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        .receive-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .receive-btn:hover {
+            background-color: #F57C00;
+        }
+        
+        .transfer-mode {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .transfer-mode:hover {
+            background-color: #7B1FA2;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .undo-btn {
+            background-color: #FFC107;
+            color: black;
+        }
+        
+        .undo-btn:hover:not(:disabled) {
+            background-color: #FFA000;
+        }
+        
+        .reset-btn {
+            background-color: #607D8B;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #455A64;
+        }
+        
+        .solve-btn {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .solve-btn:hover {
+            background-color: #7B1FA2;
+        }
+        
+        .control-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            color: #999;
+        }
+        
+        .goal {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .targets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .target-btn {
+            padding: 8px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .target-btn.active {
+            background-color: #7cfc00;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .target-btn:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .step-counter {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rating-text {
+            font-size: 1rem;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .star {
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+        
+        .star.filled {
+            color: gold;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+        }
+        
+        .history {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .history ul {
+            list-style-type: none;
+        }
+        
+        .history li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .win-message {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #7cfc00;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .transfer-info {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .jugs-container {
+                gap: 20px;
+            }
+            
+            .jug {
+                width: 110px;
+            }
+            
+            .jug-graphic {
+                width: 80px;
+                height: 160px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teka-Teki 3 Guci</h1>
+        
+        <div class="description">
+            <p>Anda memiliki tiga guci dengan kapasitas berbeda. Tujuan Anda adalah mengukur tepat <strong id="target-display">0</strong> liter air dengan melakukan serangkaian tindakan menuangkan air antar guci.</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="game1">Game 1</button>
+            <button class="tab" data-tab="game2">Game 2</button>
+            <button class="tab" data-tab="game3">Game 3</button>
+            <button class="tab" data-tab="game4">Game 4</button>
+            <button class="tab" data-tab="game5">Game 5</button>
+            <button class="tab" data-tab="game6">Game 6</button>
+            <button class="tab" data-tab="game7">Game 7</button>
+            <button class="tab" data-tab="game8">Game 8</button>
+            <button class="tab" data-tab="game9">Game 9</button>
+            <button class="tab" data-tab="game10">Game 10</button>
+        </div>
+        
+        <div class="goal">
+            Tujuan: Dapatkan tepat <span id="target-value">0</span> liter air di salah satu guci
+        </div>
+        
+        <div class="targets" id="targets-container">
+            <!-- Target buttons will be generated here -->
+        </div>
+        
+        <div class="transfer-info" id="transfer-info">
+            Mode PINDAH aktif. Pilih guci tujuan untuk menerima air.
+        </div>
+        
+        <div class="game-area">
+            <div class="jugs-container">
+                <div class="jug">
+                    <div class="jug-label">Guci A</div>
+                    <div class="jug-graphic">
+                        <div class="water" id="water-a" style="height: 0%;"></div>
+                        <div class="water-level" id="level-a">0L</div>
+                    </div>
+                    <div class="jug-capacity">
+                        Kapasitas: <span id="capacity-a">8</span> liter
+                    </div>
+                    <div class="jug-controls">
+                        <button class="jug-btn fill-btn" data-jug="a">ISI</button>
+                        <button class="jug-btn empty-btn" data-jug="a">BUANG</button>
+                        <button class="jug-btn transfer-btn" data-jug="a">PINDAH</button>
+                    </div>
+                </div>
+                
+                <div class="jug">
+                    <div class="jug-label">Guci B</div>
+                    <div class="jug-graphic">
+                        <div class="water" id="water-b" style="height: 0%;"></div>
+                        <div class="water-level" id="level-b">0L</div>
+                    </div>
+                    <div class="jug-capacity">
+                        Kapasitas: <span id="capacity-b">5</span> liter
+                    </div>
+                    <div class="jug-controls">
+                        <button class="jug-btn fill-btn" data-jug="b">ISI</button>
+                        <button class="jug-btn empty-btn" data-jug="b">BUANG</button>
+                        <button class="jug-btn transfer-btn" data-jug="b">PINDAH</button>
+                    </div>
+                </div>
+                
+                <div class="jug">
+                    <div class="jug-label">Guci C</div>
+                    <div class="jug-graphic">
+                        <div class="water" id="water-c" style="height: 0%;"></div>
+                        <div class="water-level" id="level-c">0L</div>
+                    </div>
+                    <div class="jug-capacity">
+                        Kapasitas: <span id="capacity-c">3</span> liter
+                    </div>
+                    <div class="jug-controls">
+                        <button class="jug-btn fill-btn" data-jug="c">ISI</button>
+                        <button class="jug-btn empty-btn" data-jug="c">BUANG</button>
+                        <button class="jug-btn transfer-btn" data-jug="c">PINDAH</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-controls">
+            <button class="control-btn undo-btn" id="undo-btn">UNDO</button>
+            <button class="control-btn reset-btn" id="reset-btn">RESET</button>
+            <button class="control-btn solve-btn" id="solve-btn">SOLUSI</button>
+        </div>
+        
+        <div class="win-message" id="win-message">
+            Selamat! Anda berhasil mencapai target!
+        </div>
+        
+        <div class="history-container">
+            <div class="stats">
+                <div class="step-counter">Jumlah Langkah: <span id="step-count">0</span></div>
+                <div class="rating">
+                    <span class="rating-text">Selamat Anda Mendapatkan:</span>
+                    <div class="stars" id="stars-container">
+                        <!-- Stars will be generated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="history">
+                <h3>Riwayat Tindakan</h3>
+                <ul id="action-history"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi game
+        const games = {
+            game1: { 
+                name: "Game 1", 
+                jugs: { a: 7, b: 4, c: 20 }, 
+                targets: [2, 5, 10, 14],
+                optimalSteps: { 2: 10, 5: 6, 10: 8, 14: 4 }  // Jumlah langkah optimal untuk setiap target
+            },
+            game2: { 
+                name: "Game 2", 
+                jugs: { a: 8, b: 5, c: 3 }, 
+                targets: [4],
+                optimalSteps: { 4: 6 }
+            },
+            game3: { 
+                name: "Game 3", 
+                jugs: { a: 10, b: 7, c: 3 }, 
+                targets: [5],
+                optimalSteps: { 5: 8 }
+            },
+            game4: { 
+                name: "Game 4", 
+                jugs: { a: 12, b: 8, c: 5 }, 
+                targets: [6],
+                optimalSteps: { 6: 10 }
+            },
+            game5: { 
+                name: "Game 5", 
+                jugs: { a: 15, b: 9, c: 6 }, 
+                targets: [10],
+                optimalSteps: { 10: 12 }
+            },
+            game6: { 
+                name: "Game 6", 
+                jugs: { a: 20, b: 14, c: 8 }, 
+                targets: [12],
+                optimalSteps: { 12: 14 }
+            },
+            game7: { 
+                name: "Game 7", 
+                jugs: { a: 25, b: 17, c: 10 }, 
+                targets: [15],
+                optimalSteps: { 15: 16 }
+            },
+            game8: { 
+                name: "Game 8", 
+                jugs: { a: 30, b: 20, c: 12 }, 
+                targets: [18],
+                optimalSteps: { 18: 18 }
+            },
+            game9: { 
+                name: "Game 9", 
+                jugs: { a: 40, b: 25, c: 15 }, 
+                targets: [20],
+                optimalSteps: { 20: 20 }
+            },
+            game10: { 
+                name: "Game 10", 
+                jugs: { a: 50, b: 30, c: 20 }, 
+                targets: [25],
+                optimalSteps: { 25: 22 }
+            }
+        };
+
+        // Inisialisasi state guci
+        let jugs = {
+            a: { capacity: 8, current: 0 },
+            b: { capacity: 5, current: 0 },
+            c: { capacity: 3, current: 0 }
+        };
+        
+        let target = 4;
+        let actionHistory = [];
+        let stepCount = 0;
+        let currentGame = 'game1';
+        let gameStates = []; // Untuk fitur undo
+        let transferMode = false;
+        let transferFrom = null;
+        
+        // Elemen DOM
+        const waterA = document.getElementById('water-a');
+        const waterB = document.getElementById('water-b');
+        const waterC = document.getElementById('water-c');
+        const levelA = document.getElementById('level-a');
+        const levelB = document.getElementById('level-b');
+        const levelC = document.getElementById('level-c');
+        const capacityA = document.getElementById('capacity-a');
+        const capacityB = document.getElementById('capacity-b');
+        const capacityC = document.getElementById('capacity-c');
+        const undoBtn = document.getElementById('undo-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const solveBtn = document.getElementById('solve-btn');
+        const targetDisplay = document.getElementById('target-display');
+        const targetValue = document.getElementById('target-value');
+        const winMessage = document.getElementById('win-message');
+        const actionHistoryList = document.getElementById('action-history');
+        const targetsContainer = document.getElementById('targets-container');
+        const tabButtons = document.querySelectorAll('.tab');
+        const stepCountElement = document.getElementById('step-count');
+        const starsContainer = document.getElementById('stars-container');
+        const transferInfo = document.getElementById('transfer-info');
+        const fillButtons = document.querySelectorAll('.fill-btn');
+        const emptyButtons = document.querySelectorAll('.empty-btn');
+        const transferButtons = document.querySelectorAll('.transfer-btn');
+        
+        // Update tampilan guci
+        function updateJugDisplay() {
+            // Update level air
+            waterA.style.height = `${(jugs.a.current / jugs.a.capacity) * 100}%`;
+            waterB.style.height = `${(jugs.b.current / jugs.b.capacity) * 100}%`;
+            waterC.style.height = `${(jugs.c.current / jugs.c.capacity) * 100}%`;
+            
+            // Update teks level
+            levelA.textContent = `${jugs.a.current}L`;
+            levelB.textContent = `${jugs.b.current}L`;
+            levelC.textContent = `${jugs.c.current}L`;
+            
+            // Update kapasitas
+            capacityA.textContent = jugs.a.capacity;
+            capacityB.textContent = jugs.b.capacity;
+            capacityC.textContent = jugs.c.capacity;
+            
+            // Update jumlah langkah
+            stepCountElement.textContent = stepCount;
+            
+            // Update bintang
+            updateStars();
+            
+            // Periksa kemenangan
+            checkWin();
+        }
+        
+        // Simpan state game untuk undo
+        function saveGameState() {
+            gameStates.push({
+                a: { ...jugs.a },
+                b: { ...jugs.b },
+                c: { ...jugs.c }
+            });
+            
+            // Batasi jumlah state yang disimpan (maksimal 50)
+            if (gameStates.length > 50) {
+                gameStates.shift();
+            }
+            
+            // Aktifkan tombol undo
+            undoBtn.disabled = false;
+        }
+        
+        // Undo langkah terakhir
+        function undoLastAction() {
+            if (gameStates.length > 0) {
+                const lastState = gameStates.pop();
+                jugs.a = lastState.a;
+                jugs.b = lastState.b;
+                jugs.c = lastState.c;
+                
+                // Keluar dari mode transfer jika aktif
+                if (transferMode) {
+                    exitTransferMode();
+                }
+                
+                // Kurangi jumlah langkah
+                if (stepCount > 0) {
+                    stepCount--;
+                }
+                
+                // Hapus tindakan terakhir dari riwayat
+                if (actionHistory.length > 0) {
+                    actionHistory.pop();
+                    if (actionHistoryList.lastChild) {
+                        actionHistoryList.removeChild(actionHistoryList.lastChild);
+                    }
+                }
+                
+                updateJugDisplay();
+                
+                // Nonaktifkan tombol undo jika tidak ada state lagi
+                if (gameStates.length === 0) {
+                    undoBtn.disabled = true;
+                }
+            }
+        }
+        
+        // Isi guci penuh
+        function fillJug(jug) {
+            if (!jug) return false;
+            
+            saveGameState();
+            jugs[jug].current = jugs[jug].capacity;
+            stepCount++;
+            
+            // Catat tindakan
+            const actionText = `Mengisi Guci ${jug.toUpperCase()} penuh (${jugs[jug].capacity}L)`;
+            actionHistory.push(actionText);
+            
+            // Update riwayat
+            updateHistory(actionText);
+            
+            updateJugDisplay();
+            return true;
+        }
+        
+        // Kosongkan guci
+        function emptyJug(jug) {
+            if (!jug) return false;
+            
+            saveGameState();
+            jugs[jug].current = 0;
+            stepCount++;
+            
+            // Catat tindakan
+            const actionText = `Mengosongkan Guci ${jug.toUpperCase()}`;
+            actionHistory.push(actionText);
+            
+            // Update riwayat
+            updateHistory(actionText);
+            
+            updateJugDisplay();
+            return true;
+        }
+        
+        // Masuk ke mode transfer
+        function enterTransferMode(fromJug) {
+            if (jugs[fromJug].current === 0) return false;
+            
+            transferMode = true;
+            transferFrom = fromJug;
+            
+            // Update tampilan tombol
+            transferButtons.forEach(btn => {
+                const jug = btn.dataset.jug;
+                if (jug === fromJug) {
+                    btn.textContent = "BATAL";
+                    btn.classList.remove('transfer-btn');
+                    btn.classList.add('transfer-mode');
+                } else {
+                    btn.textContent = "TERIMA";
+                    btn.classList.remove('transfer-btn');
+                    btn.classList.add('receive-btn');
+                }
+            });
+            
+            // Nonaktifkan tombol isi dan buang
+            fillButtons.forEach(btn => btn.disabled = true);
+            emptyButtons.forEach(btn => btn.disabled = true);
+            
+            // Tampilkan info transfer
+            transferInfo.style.display = 'block';
+            
+            return true;
+        }
+        
+        // Keluar dari mode transfer
+        function exitTransferMode() {
+            transferMode = false;
+            transferFrom = null;
+            
+            // Kembalikan tampilan tombol
+            transferButtons.forEach(btn => {
+                btn.textContent = "PINDAH";
+                btn.classList.remove('transfer-mode', 'receive-btn');
+                btn.classList.add('transfer-btn');
+            });
+            
+            // Aktifkan tombol isi dan buang
+            fillButtons.forEach(btn => btn.disabled = false);
+            emptyButtons.forEach(btn => btn.disabled = false);
+            
+            // Sembunyikan info transfer
+            transferInfo.style.display = 'none';
+        }
+        
+        // Lakukan transfer air
+        function transferWater(fromJug, toJug) {
+            if (!fromJug || !toJug || fromJug === toJug) return false;
+            
+            const from = jugs[fromJug];
+            const to = jugs[toJug];
+            
+            // Hitung berapa banyak yang bisa dituangkan
+            const spaceAvailable = to.capacity - to.current;
+            const amountToPour = Math.min(from.current, spaceAvailable);
+            
+            if (amountToPour === 0) return false;
+            
+            saveGameState();
+            
+            // Lakukan penuangan
+            from.current -= amountToPour;
+            to.current += amountToPour;
+            stepCount++;
+            
+            // Catat tindakan
+            const actionText = `Menuangkan ${amountToPour}L dari Guci ${fromJug.toUpperCase()} ke Guci ${toJug.toUpperCase()}`;
+            actionHistory.push(actionText);
+            
+            // Update riwayat
+            updateHistory(actionText);
+            
+            updateJugDisplay();
+            return true;
+        }
+        
+        // Update riwayat tindakan
+        function updateHistory(actionText) {
+            const listItem = document.createElement('li');
+            listItem.textContent = actionText;
+            actionHistoryList.appendChild(listItem);
+            actionHistoryList.scrollTop = actionHistoryList.scrollHeight;
+        }
+        
+        // Reset semua guci
+        function resetJugs() {
+            jugs.a.current = 0;
+            jugs.b.current = 0;
+            jugs.c.current = 0;
+            actionHistory = [];
+            actionHistoryList.innerHTML = '';
+            stepCount = 0;
+            gameStates = [];
+            winMessage.style.display = 'none';
+            undoBtn.disabled = true;
+            
+            // Keluar dari mode transfer jika aktif
+            if (transferMode) {
+                exitTransferMode();
+            }
+            
+            updateJugDisplay();
+        }
+        
+        // Periksa apakah target telah tercapai
+        function checkWin() {
+            if (jugs.a.current === target || jugs.b.current === target || jugs.c.current === target) {
+                winMessage.style.display = 'block';
+                fillButtons.forEach(btn => btn.disabled = true);
+                emptyButtons.forEach(btn => btn.disabled = true);
+                transferButtons.forEach(btn => btn.disabled = true);
+                
+                // Keluar dari mode transfer jika aktif
+                if (transferMode) {
+                    exitTransferMode();
+                }
+            } else {
+                winMessage.style.display = 'none';
+                fillButtons.forEach(btn => btn.disabled = false);
+                emptyButtons.forEach(btn => btn.disabled = false);
+                transferButtons.forEach(btn => btn.disabled = false);
+            }
+        }
+        
+        // Update bintang berdasarkan jumlah langkah
+        function updateStars() {
+            const game = games[currentGame];
+            const optimalSteps = game.optimalSteps[target] || 10;
+            let stars = 0;
+            
+            if (stepCount > 0) {
+                // Hitung bintang berdasarkan perbandingan dengan langkah optimal
+                const ratio = optimalSteps / stepCount;
+                
+                if (ratio >= 1) {
+                    stars = 5; // Langkah <= optimal
+                } else if (ratio >= 0.8) {
+                    stars = 4; // Langkah <= 1.25x optimal
+                } else if (ratio >= 0.6) {
+                    stars = 3; // Langkah <= 1.67x optimal
+                } else if (ratio >= 0.4) {
+                    stars = 2; // Langkah <= 2.5x optimal
+                } else {
+                    stars = 1; // Langkah > 2.5x optimal
+                }
+            }
+            
+            // Update tampilan bintang
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.classList.add('star');
+                if (i < stars) {
+                    star.classList.add('filled');
+                }
+                star.innerHTML = '★';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Tunjukkan solusi untuk teka-teki guci
+        function showSolution() {
+            resetJugs();
+            
+            // Solusi untuk game yang sedang aktif
+            let solutionSteps = [];
+            
+            if (currentGame === 'game1') {
+                // Solusi untuk Game 1: Guci 7L, 4L, 20L dengan target 2L, 5L, 10L, 14L
+                if (target === 2) {
+                    solutionSteps = [
+                        { type: 'fill', jug: 'c' },    // Isi C (20L)
+                        { type: 'pour', from: 'c', to: 'a' },  // Tuang C ke A (A=7, C=13)
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=4, C=9)
+                        { type: 'empty', jug: 'b' },   // Kosongkan B
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=4, C=5)
+                        { type: 'empty', jug: 'b' },   // Kosongkan B
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=4, C=1)
+                        { type: 'pour', from: 'b', to: 'a' },  // Tuang B ke A (A=7, B=0)
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=1, C=0)
+                        { type: 'fill', jug: 'c' },    // Isi C (20L)
+                        { type: 'pour', from: 'c', to: 'b' }   // Tuang C ke B (B=4, C=17) -> Target 4L di B
+                    ];
+                } else if (target === 5) {
+                    solutionSteps = [
+                        { type: 'fill', jug: 'c' },    // Isi C (20L)
+                        { type: 'pour', from: 'c', to: 'a' },  // Tuang C ke A (A=7, C=13)
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=4, C=9)
+                        { type: 'empty', jug: 'b' },   // Kosongkan B
+                        { type: 'pour', from: 'c', to: 'b' },  // Tuang C ke B (B=4, C=5) -> Target 5L di C
+                    ];
+                }
+                // Tambahkan solusi untuk target lainnya di sini
+            } else if (currentGame === 'game2') {
+                // Solusi klasik untuk guci 8, 5, 3 dengan target 4
+                solutionSteps = [
+                    { type: 'fill', jug: 'a' },
+                    { type: 'pour', from: 'a', to: 'b' },
+                    { type: 'pour', from: 'b', to: 'c' },
+                    { type: 'pour', from: 'c', to: 'a' },
+                    { type: 'pour', from: 'b', to: 'c' },
+                    { type: 'pour', from: 'a', to: 'b' },
+                    { type: 'pour', from: 'b', to: 'c' }
+                ];
+            }
+            
+            // Jalankan solusi langkah demi langkah dengan jeda
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < solutionSteps.length) {
+                    const stepInfo = solutionSteps[step];
+                    
+                    if (stepInfo.type === 'fill') {
+                        fillJug(stepInfo.jug);
+                    } else if (stepInfo.type === 'empty') {
+                        emptyJug(stepInfo.jug);
+                    } else if (stepInfo.type === 'pour') {
+                        transferWater(stepInfo.from, stepInfo.to);
+                    }
+                    
+                    step++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+        
+        // Ubah game
+        function changeGame(gameId) {
+            currentGame = gameId;
+            const game = games[gameId];
+            
+            // Update kapasitas guci
+            jugs.a.capacity = game.jugs.a;
+            jugs.b.capacity = game.jugs.b;
+            jugs.c.capacity = game.jugs.c;
+            
+            // Reset guci
+            resetJugs();
+            
+            // Update target
+            updateTargetButtons(game.targets);
+            
+            // Set target pertama sebagai default
+            if (game.targets.length > 0) {
+                target = game.targets[0];
+                updateTargetDisplay();
+            }
+            
+            // Update tab aktif
+            tabButtons.forEach(tab => {
+                if (tab.dataset.tab === gameId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
+        
+        // Update tombol target
+        function updateTargetButtons(targets) {
+            targetsContainer.innerHTML = '';
+            
+            targets.forEach(t => {
+                const button = document.createElement('button');
+                button.classList.add('target-btn');
+                if (t === target) button.classList.add('active');
+                button.textContent = `${t} Liter`;
+                button.dataset.target = t;
+                
+                button.addEventListener('click', () => {
+                    target = t;
+                    updateTargetDisplay();
+                    
+                    // Update status aktif tombol
+                    document.querySelectorAll('.target-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                    
+                    resetJugs();
+                });
+                
+                targetsContainer.appendChild(button);
+            });
+        }
+        
+        // Update tampilan target
+        function updateTargetDisplay() {
+            targetDisplay.textContent = target;
+            targetValue.textContent = target;
+        }
+        
+        // Event listeners untuk tombol guci
+        fillButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const jug = btn.dataset.jug;
+                fillJug(jug);
+            });
+        });
+        
+        emptyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const jug = btn.dataset.jug;
+                emptyJug(jug);
+            });
+        });
+        
+        transferButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const jug = btn.dataset.jug;
+                
+                if (transferMode) {
+                    if (jug === transferFrom) {
+                        // Batal transfer
+                        exitTransferMode();
+                    } else {
+                        // Lakukan transfer
+                        transferWater(transferFrom, jug);
+                        exitTransferMode();
+                    }
+                } else {
+                    // Masuk ke mode transfer
+                    enterTransferMode(jug);
+                }
+            });
+        });
+        
+        undoBtn.addEventListener('click', undoLastAction);
+        
+        resetBtn.addEventListener('click', resetJugs);
+        
+        solveBtn.addEventListener('click', showSolution);
+        
+        tabButtons.forEach(tab => {
+            tab.addEventListener('click', () => {
+                changeGame(tab.dataset.tab);
+            });
+        });
+        
+        // Inisialisasi
+        changeGame('game1');
+        updateJugDisplay();
+    </script>
+</body>
+</html>
