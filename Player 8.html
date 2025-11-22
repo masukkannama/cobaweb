@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Max Video M3U Player (Link & Local)</title>
+    <title>Vercel M3U Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* --- RESET & BASIC --- */
+        /* --- STYLE SAMA SEPERTI SEBELUMNYA --- */
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -17,7 +17,7 @@
             display: flex;
         }
 
-        /* --- KIRI: VIDEO --- */
+        /* Layout Kiri (Video) */
         .video-section {
             flex: 4;
             background: black;
@@ -28,7 +28,7 @@
         }
         video { width: 100%; height: 100%; max-height: 100vh; }
 
-        /* --- KANAN: SIDEBAR --- */
+        /* Layout Kanan (Sidebar) */
         .sidebar {
             flex: 1;
             background: #181818;
@@ -40,7 +40,6 @@
             height: 100vh;
         }
 
-        /* LIST PLAYLIST */
         .playlist-container {
             flex: 1;
             overflow-y: auto;
@@ -57,7 +56,7 @@
         }
         #channel-list { list-style: none; width: 100%; }
 
-        /* ITEM CHANNEL */
+        /* Item List */
         .channel-item {
             padding: 8px 15px;
             border-bottom: 1px solid #252525;
@@ -85,7 +84,7 @@
         }
         .channel-item.active .channel-name { color: #fff; font-weight: bold; }
 
-        /* INPUT AREA */
+        /* Input Area */
         .input-section {
             flex-shrink: 0;
             background: #1f1f1f;
@@ -148,10 +147,10 @@
                 <input type="file" id="fileInput" accept=".m3u,.m3u8" style="display:none">
             </div>
             <div class="input-group">
-                <textarea id="TextInput" placeholder="Paste Link .m3u / .m3u8 atau Teks..."></textarea>
+                <textarea id="TextInput" placeholder="Paste Link M3U / Link M3U8..."></textarea>
                 <button class="btn-go" onclick="processManualInput()">▶</button>
             </div>
-            <div id="status" class="status-msg"></div>
+            <div id="status" class="status-msg">Ready (Mode Vercel/GitHub).</div>
         </div>
     </div>
 
@@ -160,58 +159,71 @@
         var hls = null;
         var statusDiv = document.getElementById('status');
 
-        // --- ENGINE PLAYER ---
+        // --- 1. FUNGSI PEMUTAR VIDEO ---
         function playStream(url) {
             if (Hls.isSupported()) {
                 if (hls) hls.destroy();
                 hls = new Hls();
                 hls.loadSource(url);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
+                hls.on(Hls.Events.MANIFEST_PARSED, function() { 
+                    video.play().catch(e => console.log("Autoplay dicegah browser")); 
+                });
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        console.log("HLS Error:", data);
+                        if(data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+                    }
+                });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
                 video.play();
             }
         }
 
-        // --- LOGIKA INPUT BARU (PENTING) ---
+        // --- 2. LOGIKA INPUT (KHUSUS GITHUB/VERCEL) ---
         function processManualInput() {
             var val = document.getElementById('TextInput').value.trim();
             if(!val) return alert("Input kosong!");
 
             statusDiv.innerText = "Memproses...";
 
-            // 1. Jika input adalah TEKS RAW M3U (Paste isi file)
+            // A. Jika Input adalah TEKS M3U (Isi file dipaste)
             if (val.includes('#EXTINF') || val.includes('#EXTM3U')) {
                 statusDiv.innerText = "Memuat dari teks...";
                 parseAndRender(val);
             } 
-            // 2. Jika input adalah LINK M3U (http... .m3u) -> FETCH DULU
+            // B. Jika Input adalah LINK PLAYLIST (.m3u) -> PAKAI PUBLIC PROXY
             else if (val.toLowerCase().includes('.m3u') && !val.toLowerCase().includes('.m3u8')) {
-                statusDiv.innerText = "Mendownload playlist dari link...";
-                fetch(val)
+                statusDiv.innerText = "Mengambil playlist via Public Proxy...";
+                
+                // --- RAHASIA: Pakai 'AllOrigins' agar bisa fetch link dari Vercel ---
+                var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(val);
+
+                fetch(proxyUrl)
                     .then(response => {
-                        if (!response.ok) throw new Error("Gagal akses link");
+                        if(!response.ok) throw new Error("Gagal akses proxy");
                         return response.text();
                     })
                     .then(text => {
+                        if(!text || text.length < 10) throw new Error("Isi file kosong/salah");
                         parseAndRender(text);
                         statusDiv.innerText = "Berhasil download playlist.";
                     })
                     .catch(err => {
                         console.error(err);
-                        statusDiv.innerText = "Gagal: Cek CORS atau Link Mati.";
-                        alert("Gagal mengambil playlist dari link. \nPastikan CORS Unblock aktif atau link mengizinkan akses browser.");
+                        statusDiv.innerText = "Gagal. Cek Link / Mixed Content.";
+                        alert("Gagal mengambil playlist.\n\nKemungkinan:\n1. Link Playlist mati.\n2. Link Playlist memblokir proxy 'AllOrigins'.\n3. Coba download file .m3u lalu drag-n-drop saja.");
                     });
             }
-            // 3. Jika input adalah LINK VIDEO (.m3u8) atau stream biasa
+            // C. Jika Input adalah LINK VIDEO (.m3u8)
             else {
-                statusDiv.innerText = "Memutar video langsung...";
+                statusDiv.innerText = "Memutar video...";
                 playStream(val);
             }
         }
 
-        // --- PARSER ---
+        // --- 3. PARSER M3U (BACA TEKS JADI DAFTAR) ---
         function parseAndRender(content) {
             var lines = content.split('\n');
             var channels = [];
@@ -236,13 +248,17 @@
             renderList(channels);
         }
 
+        // --- 4. RENDER KE LAYAR ---
         function renderList(data) {
             var list = document.getElementById('channel-list');
             list.innerHTML = '';
             document.getElementById('count').innerText = `(${data.length})`;
             statusDiv.innerText = `Memuat ${data.length} channel.`;
 
-            if(data.length === 0) return;
+            if(data.length === 0) {
+                statusDiv.innerText = "Playlist kosong.";
+                return;
+            }
 
             data.forEach(ch => {
                 var li = document.createElement('li');
@@ -262,7 +278,7 @@
             });
         }
 
-        // --- DRAG & DROP ---
+        // --- 5. DRAG & DROP ---
         var dropZone = document.getElementById('drop-zone');
         function handleFile(file) {
             var reader = new FileReader();
