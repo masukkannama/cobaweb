@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max Video M3U Player (Link & Local)</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        /* --- RESET & BASIC --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #000;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- KIRI: VIDEO --- */
+        .video-section {
+            flex: 4;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        video { width: 100%; height: 100%; max-height: 100vh; }
+
+        /* --- KANAN: SIDEBAR --- */
+        .sidebar {
+            flex: 1;
+            background: #181818;
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+            max-width: 450px;
+            height: 100vh;
+        }
+
+        /* LIST PLAYLIST */
+        .playlist-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .playlist-header {
+            padding: 15px;
+            background: #222;
+            border-bottom: 1px solid #333;
+            font-weight: bold;
+            font-size: 14px;
+            position: sticky; top: 0; z-index: 5;
+        }
+        #channel-list { list-style: none; width: 100%; }
+
+        /* ITEM CHANNEL */
+        .channel-item {
+            padding: 8px 15px;
+            border-bottom: 1px solid #252525;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+        .channel-item:hover { background: #2a2a2a; }
+        .channel-item.active { background: #0056b3; }
+
+        .channel-logo {
+            width: 50px; height: 50px; object-fit: contain;
+            background: #fff; border-radius: 4px; flex-shrink: 0; padding: 2px;
+        }
+        .no-logo {
+            width: 50px; height: 50px; background: #333; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #555; flex-shrink: 0;
+        }
+        .channel-name {
+            font-size: 13px; color: #ddd; font-weight: 500;
+            line-height: 1.4;
+        }
+        .channel-item.active .channel-name { color: #fff; font-weight: bold; }
+
+        /* INPUT AREA */
+        .input-section {
+            flex-shrink: 0;
+            background: #1f1f1f;
+            border-top: 2px solid #333;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .drop-zone {
+            border: 2px dashed #444;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            color: #777;
+            font-size: 12px;
+            background: #151515;
+        }
+        .drop-zone:hover { border-color: #007bff; color: #fff; }
+        .input-group { display: flex; gap: 5px; }
+        textarea {
+            flex: 1; height: 40px; background: #2a2a2a; border: 1px solid #444;
+            color: #fff; padding: 5px; border-radius: 4px; resize: none;
+            font-family: monospace; font-size: 11px;
+        }
+        textarea:focus { border-color: #007bff; }
+        .btn-go {
+            background: #007bff; color: white; border: none; border-radius: 4px;
+            width: 40px; cursor: pointer; font-weight: bold;
+        }
+        .btn-go:hover { background: #0056b3; }
+        .status-msg { font-size: 11px; color: #aaa; margin-top: -5px; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .video-section { height: 40vh; flex: none; position: sticky; top: 0; z-index: 10; }
+            .sidebar { width: 100%; max-width: 100%; height: auto; flex: 1; }
+            .input-section { order: 2; } .playlist-container { height: 300px; order: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-section">
+        <video id="video" controls autoplay></video>
+    </div>
+
+    <div class="sidebar">
+        <div class="playlist-container">
+            <div class="playlist-header">Playlist <span id="count" style="float:right; color:#777">(0)</span></div>
+            <ul id="channel-list">
+                <li style="padding:15px; text-align:center; color:#555; font-size:12px;">List Kosong</li>
+            </ul>
+        </div>
+
+        <div class="input-section">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <p>📂 <strong>Tarik File .m3u ke sini</strong></p>
+                <input type="file" id="fileInput" accept=".m3u,.m3u8" style="display:none">
+            </div>
+            <div class="input-group">
+                <textarea id="TextInput" placeholder="Paste Link .m3u / .m3u8 atau Teks..."></textarea>
+                <button class="btn-go" onclick="processManualInput()">▶</button>
+            </div>
+            <div id="status" class="status-msg"></div>
+        </div>
+    </div>
+
+    <script>
+        var video = document.getElementById('video');
+        var hls = null;
+        var statusDiv = document.getElementById('status');
+
+        // --- ENGINE PLAYER ---
+        function playStream(url) {
+            if (Hls.isSupported()) {
+                if (hls) hls.destroy();
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+        }
+
+        // --- LOGIKA INPUT BARU (PENTING) ---
+        function processManualInput() {
+            var val = document.getElementById('TextInput').value.trim();
+            if(!val) return alert("Input kosong!");
+
+            statusDiv.innerText = "Memproses...";
+
+            // 1. Jika input adalah TEKS RAW M3U (Paste isi file)
+            if (val.includes('#EXTINF') || val.includes('#EXTM3U')) {
+                statusDiv.innerText = "Memuat dari teks...";
+                parseAndRender(val);
+            } 
+            // 2. Jika input adalah LINK M3U (http... .m3u) -> FETCH DULU
+            else if (val.toLowerCase().includes('.m3u') && !val.toLowerCase().includes('.m3u8')) {
+                statusDiv.innerText = "Mendownload playlist dari link...";
+                fetch(val)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Gagal akses link");
+                        return response.text();
+                    })
+                    .then(text => {
+                        parseAndRender(text);
+                        statusDiv.innerText = "Berhasil download playlist.";
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        statusDiv.innerText = "Gagal: Cek CORS atau Link Mati.";
+                        alert("Gagal mengambil playlist dari link. \nPastikan CORS Unblock aktif atau link mengizinkan akses browser.");
+                    });
+            }
+            // 3. Jika input adalah LINK VIDEO (.m3u8) atau stream biasa
+            else {
+                statusDiv.innerText = "Memutar video langsung...";
+                playStream(val);
+            }
+        }
+
+        // --- PARSER ---
+        function parseAndRender(content) {
+            var lines = content.split('\n');
+            var channels = [];
+            var currentTitle = "No Name";
+            var currentLogo = null;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.startsWith('#EXTINF:')) {
+                    var parts = line.split(',');
+                    currentTitle = parts.length > 1 ? parts.slice(1).join(',') : "No Name";
+                    var logoMatch = line.match(/tvg-logo="([^"]*)"/);
+                    currentLogo = (logoMatch && logoMatch[1]) ? logoMatch[1] : null;
+                } else if (line.startsWith('http') || (line.endsWith('.m3u8') && !line.startsWith('#'))) {
+                    channels.push({ title: currentTitle, url: line, logo: currentLogo });
+                    currentTitle = "No Name";
+                    currentLogo = null;
+                }
+            });
+            renderList(channels);
+        }
+
+        function renderList(data) {
+            var list = document.getElementById('channel-list');
+            list.innerHTML = '';
+            document.getElementById('count').innerText = `(${data.length})`;
+            statusDiv.innerText = `Memuat ${data.length} channel.`;
+
+            if(data.length === 0) return;
+
+            data.forEach(ch => {
+                var li = document.createElement('li');
+                li.className = 'channel-item';
+                
+                var imgHTML = ch.logo 
+                    ? `<img src="${ch.logo}" class="channel-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"> <div class="no-logo" style="display:none">📺</div>` 
+                    : `<div class="no-logo">📺</div>`;
+
+                li.innerHTML = `${imgHTML} <span class="channel-name">${ch.title}</span>`;
+                li.onclick = () => {
+                    document.querySelectorAll('.channel-item').forEach(e => e.classList.remove('active'));
+                    li.classList.add('active');
+                    playStream(ch.url);
+                };
+                list.appendChild(li);
+            });
+        }
+
+        // --- DRAG & DROP ---
+        var dropZone = document.getElementById('drop-zone');
+        function handleFile(file) {
+            var reader = new FileReader();
+            reader.onload = (e) => parseAndRender(e.target.result);
+            reader.readAsText(file);
+        }
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if(e.target.files.length) handleFile(e.target.files[0]);
+        });
+    </script>
+</body>
+</html>
